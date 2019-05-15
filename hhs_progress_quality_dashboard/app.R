@@ -6,6 +6,12 @@ source("../tokens.R")
 # Define UI ----
 ui <- fluidPage(
   h1("TIPTOP Baseline HHS Data Quality Report: MADAGASCAR"),
+  em("Máximo Ramírez Robles"),
+  br(),
+  em(Sys.time()),
+  br(),
+  img(src = "github_icon.png", width = 30),
+  a("Dashboard GitHub Repository", href = "https://github.com/maxramirez84/r_tiptop_hhs_monitoring_shiny_dashboard"),
       
   h2("FIELD DATA COLLECTION PROGRESS"),
   helpText(textOutput("records_summary"))
