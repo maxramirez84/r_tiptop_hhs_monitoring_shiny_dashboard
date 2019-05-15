@@ -1,7 +1,25 @@
-library(shiny)
-
+# Copyright (c) 2019 Máximo Ramírez
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+# maxramirez84
+# 
+# This script builds a Shiny dashboard for monitoring the progress and data 
+# quality of the TIPTOP (https://www.tiptopmalaria.org/) household surveys. 
+#
+# INPUTS : REDCap API access information and study areas descriptions
+# OUTPUTS: A Shiny App composing the dashboard
+#
 source("../tiptop_hhs_quality.R")
 source("../tokens.R")
+
+library(shiny)
 
 # API access information
 kApiUrl   <- redcap_api_url

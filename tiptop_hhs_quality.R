@@ -1,3 +1,20 @@
+# Copyright (c) 2019 Máximo Ramírez
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+# maxramirez84
+# 
+# This script (or library) contains the auxiliar functions used to build the 
+# data quality and progress dashboard for monitoring data collection during the 
+# execution of the household surveys of the TIPTOP project 
+# (https://www.tiptopmalaria.org/).
+#
 library(redcapAPI)
 
 # Read data downloaded from REDCap directly through the API
