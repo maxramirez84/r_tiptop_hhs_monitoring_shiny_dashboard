@@ -14,7 +14,9 @@ ui <- fluidPage(
   a("Dashboard GitHub Repository", href = "https://github.com/maxramirez84/r_tiptop_hhs_monitoring_shiny_dashboard"),
       
   h2("FIELD DATA COLLECTION PROGRESS"),
-  helpText(textOutput("records_summary"))
+  helpText(textOutput("records_summary")),
+  span("Data collection by "),
+  a("MANISA", href =  "http://www.manisa.mg/")
 )
 
 # Define server logic ----
