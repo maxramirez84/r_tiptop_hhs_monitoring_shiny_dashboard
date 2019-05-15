@@ -24,7 +24,8 @@ ui <- fluidPage(
   em(Sys.time()),
   br(),
   img(src = "github_icon.png", width = 30),
-  a("Dashboard GitHub Repository", href = "https://github.com/maxramirez84/r_tiptop_hhs_monitoring_shiny_dashboard"),
+  a("Dashboard GitHub Repository", 
+    href = "https://github.com/maxramirez84/r_tiptop_hhs_monitoring_shiny_dashboard"),
       
   # Field data collection progress section
   h2("FIELD DATA COLLECTION PROGRESS"),
@@ -57,7 +58,7 @@ ui <- fluidPage(
 )
 
 # Define server logic ----
-server <- function(input, output) {
+server <- function (input, output) {
   hhs.data <- ReadData(kApiUrl, kApiToken)
   
   # Total number of records in the database when user access the shiny app
