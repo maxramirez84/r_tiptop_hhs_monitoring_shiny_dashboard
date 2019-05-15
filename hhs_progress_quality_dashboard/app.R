@@ -3,16 +3,21 @@ library(shiny)
 source("../tiptop_hhs_quality.R")
 source("../tokens.R")
 
-# Study area description
-study_areas                    <- c("Mananjary", "Toliary 2")
-study_areas_ids                <- c("mananjary", "toliary_2")
-sample_size_area_1             <- 284
-household_to_be_visited_area_1 <- 1278
-sample_size_area_2             <- 284
-household_to_be_visited_area_2 <- 1278
+# API access information
+kApiUrl   <- redcap_api_url
+kApiToken <- api_token_test # Testing project
 
-# Define UI ----
+# Study area description
+kStudyAreas                 <- c("Mananjary", "Toliary 2")
+kStudyAreasIds              <- c("mananjary", "toliary_2")
+kSampleSizeArea1            <- 284
+kHouseholdsToBeVisitedArea1 <- 1278
+kSampleSizeArea2            <- 284
+kHouseholdsToBeVisitedArea2 <- 1278
+
+# Define UI for the monitoring dashboard app
 ui <- fluidPage(
+  # Header
   h1("TIPTOP Baseline HHS Data Quality Report: MADAGASCAR"),
   em("Máximo Ramírez Robles"),
   br(),
@@ -21,27 +26,31 @@ ui <- fluidPage(
   img(src = "github_icon.png", width = 30),
   a("Dashboard GitHub Repository", href = "https://github.com/maxramirez84/r_tiptop_hhs_monitoring_shiny_dashboard"),
       
+  # Field data collection progress section
   h2("FIELD DATA COLLECTION PROGRESS"),
-  helpText(textOutput("records_summary")),
+  helpText(textOutput("records.summary")),
   span("Data collection by "),
   a("MANISA", href =  "http://www.manisa.mg/"),
   
+  # General progress subsection
   h3("General Progress"),
+  
+  # General progress indicators
   fluidRow(
     column(6,
       div(align = "center",
-        span(paste("Women interviewed @", study_areas[1])),
-        div(helpText(textOutput("recruited_area_1", inline = T)), 
+        span(paste("Women interviewed @", kStudyAreas[1])),
+        div(helpText(textOutput("recruited.area1", inline = T)), 
             style = "font-size: 95px"),
-        helpText(textOutput("interviewed_out_of_area1"))
+        helpText(textOutput("interviewed.out.of.area1"))
       )
     ),
     column(6,
       div(align = "center",
-        span(paste("Women interviewed @", study_areas[2])),
-        div(helpText(textOutput("recruited_area_2", inline = T)), 
+        span(paste("Women interviewed @", kStudyAreas[2])),
+        div(helpText(textOutput("recruited.area2", inline = T)), 
             style = "font-size: 95px"),
-        helpText(textOutput("interviewed_out_of_area2"))
+        helpText(textOutput("interviewed.out.of.area2"))
       )
     )
   )
@@ -49,29 +58,29 @@ ui <- fluidPage(
 
 # Define server logic ----
 server <- function(input, output) {
-  api_url   <- redcap_api_url
-  api_token <- api_token_test # Testing project
+  hhs.data <- ReadData(kApiUrl, kApiToken)
   
-  hhs_data <- readData(api_url, api_token)
-  
-  number_of_records = numberOfRecords(hhs_data)
-  last_record_date = lastRecordDate(hhs_data)
-  output$records_summary <- renderText({
-    paste0("The database contains ", number_of_records, " records ", 
-           "(last record from ", last_record_date, ").")
+  # Total number of records in the database when user access the shiny app
+  number.of.records <- NumberOfRecords(hhs.data)
+  last.record.date <- LastRecordDate(hhs.data)
+  output$records.summary <- renderText({
+    paste0("The database contains ", number.of.records, " records ", 
+           "(last record from ", last.record.date, ").")
   })
   
-  recruitment <- recruitmentRate(hhs_data, sample_size_area_1, 
-                                sample_size_area_2)
-  output$recruited_area_1 <- renderText({ paste0(recruitment[1], "%") })
-  output$recruited_area_2 <- renderText({ paste0(recruitment[2], "%") })
+  # Percentage of recruited women when user access the shiny app
+  recruitment <- RecruitmentRate(hhs.data, kSampleSizeArea1, kSampleSizeArea2)
+  output$recruited.area1 <- renderText({ paste0(recruitment[1], "%") })
+  output$recruited.area2 <- renderText({ paste0(recruitment[2], "%") })
   
-  consented <- numberOfparticipantsWhoConsented(hhs_data)
-  output$interviewed_out_of_area1 <- renderText({ 
-    paste(consented[1], "/", sample_size_area_1) 
+  # Number of interviewed women versus the number of planned interviews when 
+  # user access the shiny app
+  consented <- NumberOfparticipantsWhoConsented(hhs.data)
+  output$interviewed.out.of.area1 <- renderText({ 
+    paste(consented[1], "/", kSampleSizeArea1) 
   })
-  output$interviewed_out_of_area2 <- renderText({ 
-    paste(consented[2], "/", sample_size_area_2) 
+  output$interviewed.out.of.area2 <- renderText({ 
+    paste(consented[2], "/", kSampleSizeArea2) 
   })
 }
 
