@@ -17,25 +17,55 @@
 #
 library(redcapAPI)
 
-# Read data downloaded from REDCap directly through the API
-ReadData <- function (api.url = "", api.token = "") {
+ReadData <- function(api.url, api.token) {
+  # Export dataset from the REDCap project identified by the token and through
+  # the API.
+  #
+  # Args:
+  #   api.url: URL of the REDCap API.
+  #   api.token: Token for accessing the project to export the data.
+  #
+  # Returns:
+  #   A data frame containing all the records data for the specified project.
   rcon <- redcapConnection(api.url, api.token)
   
   exportRecords(rcon, factors = F)
 }
 
-# Get the number of records uploaded to REDCap
-NumberOfRecords <- function (hhs.data) {
+NumberOfRecords <- function(hhs.data) {
+  # Compute the number of records uploaded to REDCap from the dataset previously
+  # exported from REDCap.
+  #
+  # Args:
+  #   hhs.data: Data frame containing all the records of a REDCap project.
+  #
+  # Returns:
+  #   Number of records (observations) that the dataset contains.
   nrow(hhs.data)
 }
 
-# Get the timestamp of the last collected record
-LastRecordDate <- function (hhs.data) {
+LastRecordDate <- function(hhs.data) {
+  # Get the timestamp of the last collected record from the dataset previously
+  # exported from REDCap.
+  #
+  # Args:
+  #   hhs.data: Data frame containing all the records of a REDCap project.
+  #
+  # Returns:
+  #   Timestamp of the last collected record (observation) in the dataset.
   max(as.character(hhs.data$interview_date), na.rm = T)
 }
 
-# Compute number of participants who consented the interview
-NumberOfparticipantsWhoConsented <- function (hhs.data) {
+NumberOfparticipantsWhoConsented <- function(hhs.data) {
+  # Compute the number of participants who consented the interview from the 
+  # dataset previously exported from REDCap.
+  #
+  # Args:
+  #   hhs.data: Data frame containing all the records of a REDCap project.
+  #
+  # Returns:
+  #   A vector containg the number of participants who consented the interview
+  #   for each study area.
   #browser()
   consented.area1 <- table(
     hhs.data$ended_pregnancy[hhs.data$district == 1], 
@@ -62,8 +92,17 @@ NumberOfparticipantsWhoConsented <- function (hhs.data) {
   consented
 }
 
-# Compute recruitment rate
-RecruitmentRate <- function (hhs.data, sample.size.area1, sample.size.area2) {
+RecruitmentRate <- function(hhs.data, sample.size.area1, sample.size.area2) {
+  # Compute the recruitment rate from the dataset previously exported from 
+  # REDCap.
+  #
+  # Args:
+  #   hhs.data: Data frame containing all the records of a REDCap project.
+  #   sample.size.area1: Expected sample size in first area.
+  #   sample.size.area2: Expected sample size in second area.
+  #
+  # Returns:
+  #   A vector with the recruitment rate of first and second study areas.
   consented <- NumberOfparticipantsWhoConsented(hhs.data)
   
   recruitment <- c(

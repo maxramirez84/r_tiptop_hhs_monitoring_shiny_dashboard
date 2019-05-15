@@ -23,7 +23,7 @@ library(shiny)
 
 # API access information
 kApiUrl   <- redcap_api_url
-kApiToken <- api_token_test # Testing project
+kApiToken <- api_token_test  # Testing project
 
 # Study area description
 kStudyAreas                 <- c("Mananjary", "Toliary 2")
@@ -75,8 +75,8 @@ ui <- fluidPage(
   )
 )
 
-# Define server logic ----
-server <- function (input, output) {
+# Define server logic for the monitoring dashboard app
+server <- function(input, output) {
   hhs.data <- ReadData(kApiUrl, kApiToken)
   
   # Total number of records in the database when user access the shiny app
