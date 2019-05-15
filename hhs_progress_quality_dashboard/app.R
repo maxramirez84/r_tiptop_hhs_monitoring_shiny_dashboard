@@ -71,8 +71,12 @@ server <- function (input, output) {
   
   # Percentage of recruited women when user access the shiny app
   recruitment <- RecruitmentRate(hhs.data, kSampleSizeArea1, kSampleSizeArea2)
-  output$recruited.area1 <- renderText({ paste0(recruitment[1], "%") })
-  output$recruited.area2 <- renderText({ paste0(recruitment[2], "%") })
+  output$recruited.area1 <- renderText({
+    paste0(recruitment[1], "%")
+  })
+  output$recruited.area2 <- renderText({
+    paste0(recruitment[2], "%")
+  })
   
   # Number of interviewed women versus the number of planned interviews when 
   # user access the shiny app

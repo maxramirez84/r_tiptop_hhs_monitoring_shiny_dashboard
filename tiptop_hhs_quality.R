@@ -29,8 +29,16 @@ NumberOfparticipantsWhoConsented <- function (hhs.data) {
     hhs.data$resident_during_pregnancy[hhs.data$district == 2]
   )
   consented = c(
-    if (is.na(consented.area1)) 0 else consented.area1,
-    if (is.na(consented.area2)) 0 else consented.area2
+    if (is.na(consented.area1)) {
+      0 
+    } else { 
+      consented.area1
+    },
+    if (is.na(consented.area2)) {
+      0 
+    } else { 
+      consented.area2
+    }
   )
   names(consented) = c(1, 2)
   
@@ -42,10 +50,16 @@ RecruitmentRate = function (hhs.data, sample.size.area1, sample.size.area2) {
   consented = NumberOfparticipantsWhoConsented(hhs.data)
   
   recruitment = c(
-    if (is.na(consented[1])) 0 else 
-      floor((consented[1] / sample.size.area1) * 100),
-    if (is.na(consented[2])) 0 else 
+    if (is.na(consented[1])) {
+      0 
+    } else { 
+      floor((consented[1] / sample.size.area1) * 100)
+    },
+    if (is.na(consented[2])) {
+      0 
+    } else { 
       floor((consented[2] / sample.size.area2) * 100)
+    }
   )
   names(recruitment) = c(1, 2)
   
