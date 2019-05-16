@@ -121,3 +121,55 @@ RecruitmentRate <- function(hhs.data, sample.size.area1, sample.size.area2) {
   
   recruitment
 }
+
+# Color palette
+color_palette = c("gray8", "gray35", "gray90")
+
+# Visited Households per Area
+visitedHouseholdsArea = function(hhs_data, household_to_be_visited_area_1, 
+                                 household_to_be_visited_area_2, sample_size_area_1, 
+                                 sample_size_area_2, study_areas) {
+  #browser()
+  interval = 100
+  max_x_axis = max(household_to_be_visited_area_1, household_to_be_visited_area_2) + interval * 5
+  
+  consented = numberOfparticipantsWhoConsented(hhs_data)
+  recruitment = recruitmentRate(hhs_data, sample_size_area_1, sample_size_area_2)
+  
+  visits_area_1 = table(hhs_data$district)['1']
+  visits_area_2 = table(hhs_data$district)['2']
+  visits_number = c(
+    if(is.na(visits_area_1)) 0 else visits_area_1,
+    if(is.na(visits_area_2)) 0 else visits_area_2
+  )
+  completeness = c(
+    if(is.na(visits_number[1])) 0 
+    else floor((visits_number[1] / household_to_be_visited_area_1) * 100), 
+    if(is.na(visits_number[2])) 0 
+    else floor((visits_number[2] / household_to_be_visited_area_2) * 100)
+  )
+  names(completeness) = c(1, 2)
+  par(cex.lab = 1.5, cex.main = 2, cex.axis = 1.05)
+  visits_progress = barplot(
+    height      = matrix(c(consented, visits_number), nrow = 2, ncol = 2, byrow = T), 
+    horiz       = T, 
+    names.arg   = study_areas, 
+    main        = "Visited Households per Area",
+    xlab        = "Number of households",
+    ylab        = "Study areas",
+    xlim        = c(0, max_x_axis),
+    axes        = F,
+    beside      = T,
+    col = color_palette[2:3]
+  )
+  axis(1, seq(0, max_x_axis, interval))
+  legend("topright", legend = c("Interviewed", "Visited"), fill = color_palette[2:3], cex = 1.5)
+  text(
+    x      = c(visits_number,consented), 
+    y      = c(2.5, 5.5, 1.5, 4.5), 
+    labels = paste0(c(completeness, recruitment), '%'), 
+    pos    = 4, 
+    col = "red",
+    cex = 1.5
+  )
+}

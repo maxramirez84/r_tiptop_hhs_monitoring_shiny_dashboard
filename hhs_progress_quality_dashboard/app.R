@@ -72,7 +72,9 @@ ui <- fluidPage(
         helpText(textOutput("interviewed.out.of.area2"))
       )
     )
-  )
+  ),
+  
+  plotOutput("visited.households.per.area")
 )
 
 # Define server logic for the monitoring dashboard app
@@ -104,6 +106,16 @@ server <- function(input, output) {
   })
   output$interviewed.out.of.area2 <- renderText({ 
     paste(consented[2], "/", kSampleSizeArea2) 
+  })
+  
+  output$visited.households.per.area <- renderPlot({
+    visitedHouseholdsArea(
+      hhs.data, 
+      kHouseholdsToBeVisitedArea1, 
+      kHouseholdsToBeVisitedArea2, 
+      kSampleSizeArea1, 
+      kSampleSizeArea2, 
+      kStudyAreas)
   })
 }
 
