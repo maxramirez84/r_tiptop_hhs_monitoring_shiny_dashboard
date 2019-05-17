@@ -156,8 +156,6 @@ MySQLUnion <- function(...) {
   dat
 }
 
-# Converts a data frame of two columns in a list in which one column is used as keys 
-# and the other as values.
 Pivot <- function(indexes, index.column, value.column, df) {
   # Converts a data frame of two columns in a list in which one column is used 
   # as keys and the other as values.
