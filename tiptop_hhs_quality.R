@@ -16,6 +16,7 @@
 # (https://www.tiptopmalaria.org/).
 #
 library(redcapAPI)
+library(kableExtra)
 
 # Color palette
 kColorPalette <- c("gray8", "gray35", "gray90")
@@ -153,6 +154,35 @@ MySQLUnion <- function(...) {
   )
   
   dat
+}
+
+# Converts a data frame of two columns in a list in which one column is used as keys 
+# and the other as values.
+Pivot <- function(indexes, index.column, value.column, df) {
+  # Converts a data frame of two columns in a list in which one column is used 
+  # as keys and the other as values.
+  #
+  # Args:
+  #   indexes:      List of indexes to be looked for inside the data frame, if
+  #                 some index does not exist in the data frame, it will be 
+  #                 included in the list with a value of 0.
+  #   index.column: Name of the data frame column in which indexes are stored.
+  #   value.column: Name of the data frame column in which values are stored.
+  #   df:           Data frame of two columns (index, value) to be converted in
+  #                 a list.
+  #
+  # Returns:
+  #   A list of the data frame values.
+  l <- list()
+  for (i in indexes) {
+    if (length(df[value.column][df[index.column] == i]) == 0) {
+      l[i] <- 0
+    } else {
+      l[i] <- df[value.column][df[index.column] == i]
+    }
+  }
+  
+  l
 }
 
 # Plots ------------------------------------------------------------------------
@@ -316,5 +346,302 @@ ProgressOfArea <- function(hhs.data, study.area.id, study.area.name, interval,
       col    = kColorPalette[1])
   } else {
     print("There is no data.") 
+  }
+}
+
+# Tables -----------------------------------------------------------------------
+StudyProfileOfArea <- function(hhs.data, study.area.id) {
+  # Compute a table using kable (HTML output) representing the study profile of
+  # the specified study area.
+  #
+  # Args:
+  #   hhs.data:      Data frame containing all the records of a REDCap project.
+  #   study.area.id: Id of the study area to be profiled.
+  #
+  # Returns:
+  #   An HTML styled table representing the study profile of the area.
+  #browser()
+  kFontSize <- 10
+  study.area.column <- paste0("cluster_", study.area.id)
+  
+  number.hh.selected.visited <- table(hhs.data[study.area.column])
+  if (length(number.hh.selected.visited) > 0) {
+    number.hh.selected.interviewed <- table(
+      hhs.data[hhs.data$hh_acceptance == 1, study.area.column]
+    )
+    
+    number.women.childbearing.age.df <- setNames(
+      object = aggregate(
+        childbearing_age_women ~ get(study.area.column), 
+        FUN  = sum, 
+        data = hhs.data
+      ), 
+      nm     = c(study.area.column, "childbearing_age_women")
+    )
+    number.women.childbearing.age.list <- Pivot(
+      indexes      = names(number.hh.selected.visited), 
+      index.column = study.area.column, 
+      value.column = "childbearing_age_women", 
+      df           = number.women.childbearing.age.df
+    )
+    
+    number.eligible.women.df <- setNames(
+      object = aggregate(
+        residents_during_pregnancy ~ get(study.area.column), 
+        FUN  = sum, 
+        data = hhs.data
+      ),
+      nm     = c(study.area.column, "residents_during_pregnancy")
+    )
+    number.eligible.women.list <- Pivot(
+      indexes      = names(number.hh.selected.visited),
+      index.column = study.area.column,
+      value.column = "residents_during_pregnancy",
+      df           = number.eligible.women.df
+    )
+    
+    childbearing.age.women.profile <- MySQLUnion(
+      number.women.childbearing.age.list, 
+      number.eligible.women.list
+    )
+    
+    number.women.interviewed <- table(
+      subset(
+        x      = hhs.data, 
+        subset = ended_pregnancy == 1 & resident_during_pregnancy == 1
+      )[study.area.column]
+    )
+    number.women.interrupt.interview <- table(
+      subset(
+        x      = hhs.data, 
+        subset = consent == 1 & (is.na(ended_pregnancy) | ended_pregnancy == 0 | 
+                                   is.na(resident_during_pregnancy) | 
+                                   resident_during_pregnancy == 0)
+      )[study.area.column]
+    )
+    number.women.non.interviewed <- table(
+      subset(
+        x      = hhs.data, 
+        subset = consent == 0
+      )[study.area.column]
+    )
+    
+    eligible.women.selected <- MySQLUnion(
+      number.women.interviewed, 
+      number.women.interrupt.interview, 
+      number.women.non.interviewed
+    )
+    if (ncol(eligible.women.selected) > 0) {
+      eligible.women.selected.totals <- eligible.women.selected[1, ] + 
+        eligible.women.selected[2, ] + eligible.women.selected[3, ]
+    } else {
+      eligible.women.selected.totals <- number.women.interviewed  # empty table 
+    }
+    
+    number.women.denied.consent <- table(
+      hhs.data[hhs.data$why_not_consent == 0, study.area.column]
+    )
+    number.women.absent <- table(
+      hhs.data[hhs.data$why_not_consent == 2, study.area.column]
+    )
+    number.women.unabled <- table(
+      hhs.data[hhs.data$why_not_consent == 1, study.area.column]
+    )
+    number.women.other.reason <- table(
+      hhs.data[hhs.data$why_not_consent == 88, study.area.column]
+    )
+    
+    number.hh.empty <- table(
+      hhs.data[hhs.data$hh_available == 2, study.area.column]
+    )
+    number.hh.head.not.found <- table(
+      hhs.data[hhs.data$hh_available == 0, study.area.column]
+    )
+    number.hh.head.refused <- table(
+      hhs.data[hhs.data$hh_acceptance == 0, study.area.column]
+    )
+    
+    hh.selected.not.interviewed <- MySQLUnion(
+      number.hh.empty, 
+      number.hh.head.refused
+    )
+    if (ncol(hh.selected.not.interviewed) > 0) {
+      hh.selected.not.interviewed.totals <- hh.selected.not.interviewed[1, ] + 
+        hh.selected.not.interviewed[2, ]
+    } else {
+      hh.selected.not.interviewed.totals <- number.hh.empty  # emty table
+    }
+    
+    study.profile <- MySQLUnion(
+      number.hh.selected.visited, 
+      number.hh.selected.interviewed, 
+      number.women.childbearing.age.list, 
+      childbearing.age.women.profile[1, ] - childbearing.age.women.profile[2, ], 
+      number.eligible.women.list,
+      eligible.women.selected.totals,
+      number.women.interviewed,
+      number.women.interrupt.interview,
+      number.women.non.interviewed,
+      number.women.denied.consent,
+      number.women.absent,
+      number.women.unabled,
+      number.women.other.reason,
+      hh.selected.not.interviewed.totals,
+      number.hh.empty,
+      number.hh.head.not.found,
+      number.hh.head.refused
+    )
+    row.names(study.profile) <- c(
+      "HH selected visited", 
+      "HH selected interviewed", 
+      "Women of childbearing age",
+      paste0("NON eligible women", footnote_marker_symbol(1, "html")),
+      "Eligible women",
+      "Eligible women selected",
+      "Women interviewed",
+      "Women that interrupted interview",
+      "Women NON interviewed",
+      "Denied signed consent/assent",
+      "Absent",
+      "Not able to respond",
+      "Other reason",
+      "HH selected NOT interviewed",
+      "Empty/destroyed",
+      paste0("HH head not found", footnote_marker_symbol(2, "html")),
+      "HH head/other refused to consent the interview"
+    )
+    colnames(study.profile) <- paste0("C", colnames(study.profile))
+    #browser()
+    # Consistency checks within the study profile
+    study.profile.checked <- study.profile
+    for (i in colnames(study.profile)) {
+      # non_interviewed HH = empty + refused
+      study.profile.checked[c(14, 15, 17), i] <- cell_spec(
+        x        = study.profile[c(14, 15, 17), i],
+        format   = "html",
+        color    = ifelse(
+          test = study.profile[15, i] + 
+            study.profile[17, i] != study.profile[14, i], 
+          yes  = "red", 
+          no   = ""
+        ),
+        tooltip  = ifelse(
+          test = study.profile[15, i] + 
+            study.profile[17, i] != study.profile[14, i], 
+          yes  = paste("NOT interviewed HH must be equal to the sum of", 
+                       "empty/destroyed + refused"), 
+          no   = ""
+        )
+      )
+      
+      # women = eligible + non_eligible
+      study.profile.checked[c(3, 4, 5), i] <- cell_spec(
+        x        = study.profile[c(3, 4, 5), i],
+        format   = "html",
+        color    = ifelse(
+          test = study.profile[4, i] + 
+            study.profile[5, i] != study.profile[3, i], 
+          yes  = "red", 
+          no   = ""
+        ),
+        tooltip  = ifelse(
+          test = study.profile[4, i] + 
+            study.profile[5, i] != study.profile[3, i], 
+          yes  = "Women must be equal to the sum of eligibles + NON eligibles", 
+          no   = ""
+        )
+      )
+      
+      # non_interviwed women = denied + absent + unabled + other
+      study.profile.checked[c(9, 10, 11, 12, 13), i] <- cell_spec(
+        x        = study.profile[c(9, 10, 11, 12, 13), i],
+        format   = "html",
+        color    = ifelse(
+          test = study.profile[10, i] + study.profile[11, i] + 
+            study.profile[12, i] + study.profile[13, i] != study.profile[9, i], 
+          yes  = "red", 
+          no   = ""
+        ),
+        tooltip  = ifelse(
+          test = study.profile[10, i] + study.profile[11, i] + 
+            study.profile[12, i] + study.profile[13, i] != study.profile[9, i], 
+          yes  = paste("NON interviewed women must be equal to the sum of", 
+                       "denied + absent + unabled"), 
+          no   = ""
+        )
+      )
+      
+      # women selected = interviewed + interrupted + non_interviewed
+      study.profile.checked[c(6, 7, 8, 9), i] <- cell_spec(
+        x        = study.profile[c(6, 7, 8, 9), i],
+        format   = "html",
+        color    = ifelse(
+          test = study.profile[7, i] + study.profile[8, i] + 
+            study.profile[9, i] != study.profile[6, i], 
+          yes  = "red", 
+          no   = ""
+        ),
+        tooltip  = ifelse(
+          test = study.profile[7, i] + study.profile[8, i] + 
+            study.profile[9, i] != study.profile[6, i], 
+          yes  = paste("Women selected must be equal to the sum of", 
+                       "interviewed + interrupted + NON interviewed"), 
+          no   = ""
+        )
+      )
+      
+      # visited HH = interviewed + non_interviewed
+      study.profile.checked[c(1, 2, 14), i] <- cell_spec(
+        x        = study.profile[c(1, 2, 14), i],
+        format   = "html",
+        color    = ifelse(
+          test = study.profile[2, i] + 
+            study.profile[14, i] != study.profile[1, i], 
+          yes  = "red", 
+          no   = ""
+        ),
+        tooltip  = ifelse(
+          test = study.profile[2, i] + 
+            study.profile[14, i] != study.profile[1, i], 
+          yes  = paste("Visited HH must be equal to the sum of", 
+                       "interviewed + NOT interviewed"), 
+          no   = ""
+        )
+      )
+    }
+    
+    #browser()
+    kable(
+      x                 = study.profile.checked, 
+      format            = "html", 
+      escape            = F
+    ) %>% kable_styling(
+      bootstrap_options = c("striped", "hover", "responsive"), 
+      font_size         = kFontSize
+    ) %>% row_spec(
+      row               = 0, 
+      bold              = T, 
+      color             = "white", 
+      background        = "#494949"
+    ) %>% row_spec(
+      row               = c(1, 2, 3, 14), 
+      bold              = T
+    ) %>% add_indent(
+      positions         = c(10, 11, 12, 13)
+    ) %>% footnote(
+      general_title     = "Notes:",
+      general           = paste("Colored cells are consistency errors.", 
+                                "Hover over these cells to display a  tooltip", 
+                                "with the error message. Please, refer to the", 
+                                "provided Data Queries Sheet."), 
+      symbol            = c(
+        paste("Eligible woman: woman that meets selection criteria 1 and", 
+              "selection criteria 2"),
+        paste("HH head availability is not required to proceed with the", 
+              "interview as long as any other adult consents")
+      )
+    )
+  } else {
+    print("There is no data.")
   }
 }
