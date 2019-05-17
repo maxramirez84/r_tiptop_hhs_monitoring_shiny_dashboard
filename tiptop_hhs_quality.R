@@ -17,12 +17,15 @@
 #
 library(redcapAPI)
 
+# Color palette
+kColorPalette <- c("gray8", "gray35", "gray90")
+
 ReadData <- function(api.url, api.token) {
   # Export dataset from the REDCap project identified by the token and through
   # the API.
   #
   # Args:
-  #   api.url: URL of the REDCap API.
+  #   api.url:   URL of the REDCap API.
   #   api.token: Token for accessing the project to export the data.
   #
   # Returns:
@@ -97,7 +100,8 @@ RecruitmentRate <- function(hhs.data, sample.size.area1, sample.size.area2) {
   # REDCap.
   #
   # Args:
-  #   hhs.data: Data frame containing all the records of a REDCap project.
+  #   hhs.data:          Data frame containing all the records of a REDCap 
+  #                      project.
   #   sample.size.area1: Expected sample size in first area.
   #   sample.size.area2: Expected sample size in second area.
   #
@@ -122,54 +126,100 @@ RecruitmentRate <- function(hhs.data, sample.size.area1, sample.size.area2) {
   recruitment
 }
 
-# Color palette
-color_palette = c("gray8", "gray35", "gray90")
-
-# Visited Households per Area
-visitedHouseholdsArea = function(hhs_data, household_to_be_visited_area_1, 
-                                 household_to_be_visited_area_2, sample_size_area_1, 
-                                 sample_size_area_2, study_areas) {
+VisitedHouseholdsArea <- function(hhs.data, households.to.be.visited.area1, 
+                                  households.to.be.visited.area2, 
+                                  sample.size.area1, sample.size.area2, 
+                                  study.areas) {
+  # Build an horizontal bar plot showing the relationship between the number of
+  # visited versus interviewed households. On the x-axis it has Number of 
+  # households and on the y-axis the study areas. The legend has two different
+  # items: Interviewed and Visited.
+  #
+  # Args:
+  #   hhs.data:                       Data frame containing all the records of a 
+  #                                   REDCap project.
+  #   households.to.be.visited.area1: Expected number of households to visit in
+  #                                   first area in order to find the required 
+  #                                   number of eligible women.
+  #   households.to.be.visited.area2: Expected number of households to visit in
+  #                                   second area in order to find the required 
+  #                                   number of eligible women.
+  #   sample.size.area1:              Expected sample size in first area.
+  #   sample.size.area2:              Expected sample size in second area.
+  #   study.areas:                    Vector containing the name of the study
+  #                                   areas.
+  #
+  #   Returns:
+  #     It does not return anything directly but it plots the described Vis.
   #browser()
-  interval = 100
-  max_x_axis = max(household_to_be_visited_area_1, household_to_be_visited_area_2) + interval * 5
+  kInterval <- 100
+  max.x.axis <- max(
+    households.to.be.visited.area1, 
+    households.to.be.visited.area2
+  ) + 
+    kInterval * 5
   
-  consented = numberOfparticipantsWhoConsented(hhs_data)
-  recruitment = recruitmentRate(hhs_data, sample_size_area_1, sample_size_area_2)
+  consented <- NumberOfparticipantsWhoConsented(hhs.data)
+  recruitment <- RecruitmentRate(hhs.data, sample.size.area1, sample.size.area2)
   
-  visits_area_1 = table(hhs_data$district)['1']
-  visits_area_2 = table(hhs_data$district)['2']
-  visits_number = c(
-    if(is.na(visits_area_1)) 0 else visits_area_1,
-    if(is.na(visits_area_2)) 0 else visits_area_2
+  visits.area1 <- table(hhs.data$district)['1']
+  visits.area2 <- table(hhs.data$district)['2']
+  visits.number <- c(
+    if (is.na(visits.area1)) {
+      0
+    } else {
+      visits.area1
+    },
+    if (is.na(visits.area2)) {
+      0
+    } else {
+      visits.area2
+    }
   )
-  completeness = c(
-    if(is.na(visits_number[1])) 0 
-    else floor((visits_number[1] / household_to_be_visited_area_1) * 100), 
-    if(is.na(visits_number[2])) 0 
-    else floor((visits_number[2] / household_to_be_visited_area_2) * 100)
+  completeness <- c(
+    if (is.na(visits.number[1])) {
+      0
+    } else {
+      floor((visits.number[1] / households.to.be.visited.area1) * 100)
+    }, 
+    if (is.na(visits.number[2])) {
+      0
+    } else {
+      floor((visits.number[2] / households.to.be.visited.area2) * 100)
+    }
   )
-  names(completeness) = c(1, 2)
+  names(completeness) <- c(1, 2)
   par(cex.lab = 1.5, cex.main = 2, cex.axis = 1.05)
-  visits_progress = barplot(
-    height      = matrix(c(consented, visits_number), nrow = 2, ncol = 2, byrow = T), 
+  visits.progress <- barplot(
+    height      = matrix(
+      data = c(consented, visits.number), 
+      nrow = 2, 
+      ncol = 2, 
+      byrow = T
+    ), 
     horiz       = T, 
-    names.arg   = study_areas, 
+    names.arg   = study.areas, 
     main        = "Visited Households per Area",
     xlab        = "Number of households",
     ylab        = "Study areas",
-    xlim        = c(0, max_x_axis),
+    xlim        = c(0, max.x.axis),
     axes        = F,
     beside      = T,
-    col = color_palette[2:3]
+    col         = kColorPalette[2:3]
   )
-  axis(1, seq(0, max_x_axis, interval))
-  legend("topright", legend = c("Interviewed", "Visited"), fill = color_palette[2:3], cex = 1.5)
+  axis(1, seq(0, max.x.axis, kInterval))
+  legend(
+    x      = "topright", 
+    legend = c("Interviewed", "Visited"), 
+    fill   = kColorPalette[2:3], 
+    cex    = 1.5
+  )
   text(
-    x      = c(visits_number,consented), 
+    x      = c(visits.number, consented), 
     y      = c(2.5, 5.5, 1.5, 4.5), 
     labels = paste0(c(completeness, recruitment), '%'), 
     pos    = 4, 
-    col = "red",
-    cex = 1.5
+    col    = "red",
+    cex    = 1.5
   )
 }

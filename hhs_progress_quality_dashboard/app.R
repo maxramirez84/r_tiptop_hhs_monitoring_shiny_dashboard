@@ -98,8 +98,8 @@ server <- function(input, output) {
     paste0(recruitment[2], "%")
   })
   
-  # Number of interviewed women versus the number of planned interviews when 
-  # user access the shiny app
+  # Indicator: Number of interviewed women versus the number of planned 
+  # interviews when user access the shiny app
   consented <- NumberOfparticipantsWhoConsented(hhs.data)
   output$interviewed.out.of.area1 <- renderText({ 
     paste(consented[1], "/", kSampleSizeArea1) 
@@ -108,8 +108,10 @@ server <- function(input, output) {
     paste(consented[2], "/", kSampleSizeArea2) 
   })
   
+  # Horizontal Bar Plot: Number of interviewed versus visited households when 
+  # user access the shiny app
   output$visited.households.per.area <- renderPlot({
-    visitedHouseholdsArea(
+    VisitedHouseholdsArea(
       hhs.data, 
       kHouseholdsToBeVisitedArea1, 
       kHouseholdsToBeVisitedArea2, 
