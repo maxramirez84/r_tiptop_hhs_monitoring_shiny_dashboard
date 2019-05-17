@@ -79,7 +79,13 @@ ui <- fluidPage(
   # Progress in first area subsection
   h3(paste("Progress in", kStudyAreas[1])),
   
-  plotOutput("progress.of.area1")
+  plotOutput("progress.of.area1"),
+  
+  # Progress in second area subsection
+  h3(paste("Progress in", kStudyAreas[2])),
+  
+  plotOutput("progress.of.area2")
+  
 )
 
 # Define server logic for the monitoring dashboard app
@@ -132,6 +138,17 @@ server <- function(input, output) {
       hhs.data, 
       study.area.id        = kStudyAreasIds[1],
       study.area.name      = kStudyAreas[1], 
+      interval             = 10, 
+      required.visits.mean = 60)
+  })
+  
+  # Bar Plot: Number of interviewed versus visited households per cluster in
+  # second area when user access the shiny app
+  output$progress.of.area2 <- renderPlot({
+    ProgressOfArea(
+      hhs.data, 
+      study.area.id        = kStudyAreasIds[2],
+      study.area.name      = kStudyAreas[2], 
       interval             = 10, 
       required.visits.mean = 60)
   })
