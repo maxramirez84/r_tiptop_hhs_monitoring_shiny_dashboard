@@ -92,7 +92,12 @@ ui <- fluidPage(
   # Profile of first area subsection
   h3(paste("Profile of", kStudyAreas[1])),
   
-  htmlOutput("profile.of.area1")
+  htmlOutput("profile.of.area1"),
+  
+  # Profile of second area subsection
+  h3(paste("Profile of", kStudyAreas[2])),
+  
+  htmlOutput("profile.of.area2")
 )
 
 # Define server logic for the monitoring dashboard app
@@ -165,6 +170,14 @@ server <- function(input, output) {
     StudyProfileOfArea(
       hhs.data, 
       study.area.id = kStudyAreasIds[1]
+    )
+  })
+  
+  # Table: Study profile of second area when user access the shiny app
+  output$profile.of.area2 <- renderText({
+    StudyProfileOfArea(
+      hhs.data, 
+      study.area.id = kStudyAreasIds[2]
     )
   })
 }
