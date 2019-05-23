@@ -358,6 +358,7 @@ StudyProfileOfArea <- function(hhs.data, study.area.id) {
   #
   # Returns:
   #   An HTML styled table representing the study profile of the area.
+  # TODO(maxramirez84): Refactor this function, it's too long!
   #browser()
   kFontSize <- 10
   study.area.column <- paste0("cluster_", study.area.id)
@@ -608,6 +609,8 @@ StudyProfileOfArea <- function(hhs.data, study.area.id) {
       )
     }
     
+    # TODO(maxramirez84): Manage profiles of study areas with a high number of
+    # clusters.
     #browser()
     kable(
       x                 = study.profile.checked, 
