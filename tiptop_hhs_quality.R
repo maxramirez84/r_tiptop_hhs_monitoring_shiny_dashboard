@@ -646,3 +646,134 @@ StudyProfileOfArea <- function(hhs.data, study.area.id) {
     print("There is no data.")
   }
 }
+
+DuplicatesSummary <- function(hhs.data, study.area.id) {
+  # Compute a table using kable (HTML output) summarizing the duplicates found
+  # in the data set of the specified study area. Duplicates may be duplicated
+  # household, i.e. households recorded or interviewed more than once by the 
+  # same or different field workers; or same household ID used more than once 
+  # for different interviews. And they may be records in which all variables
+  # are exactly the same, i.e. records sent more than once.
+  #
+  # Args:
+  #   hhs.data:      Data frame containing all the records of a REDCap project.
+  #   study.area.id: Id of the study area in which duplicates are identified.
+  #
+  # Returns:
+  #   An HTML styled table summarizing the duplicates of the area.
+  # TODO(maxramirez84): Refactor this function, it's too long!
+  #browser()
+  kFontSize <- 10
+  study.area.column <- paste0("cluster_", study.area.id)
+  
+  non.interviewed.visits.number.area <- table(
+    hhs.data[is.na(hhs.data$consent) | hhs.data$consent != 1, study.area.column]
+  )
+  interviewed.number.area <- table(
+    hhs.data[hhs.data$consent == 1, study.area.column]
+  )
+  
+  if (length(non.interviewed.visits.number.area) > 0 | 
+      length(interviewed.number.area) > 0) {
+    duplicated.records <- hhs.data[duplicated(hhs.data[2:ncol(hhs.data)]), ]
+    
+    non.interviewed.duplicated.records.area <- table(
+      duplicated.records[
+        is.na(duplicated.records$consent) | duplicated.records$consent != 1,
+        study.area.column
+      ]
+    )
+    interviewed.duplicated.records.area <- table(
+      duplicated.records[duplicated.records$consent == 1, study.area.column]
+    )
+    
+    id.columns <- hhs.data[c(study.area.column, "household")]
+    duplicated.hh <- hhs.data[
+      duplicated(id.columns) | duplicated(id.columns, fromLast = T), 
+    ]
+    duplicated.records.from.last <- hhs.data[
+      duplicated(hhs.data[2:ncol(hhs.data)]) | 
+        duplicated(hhs.data[2:ncol(hhs.data)], fromLast = T), ]
+    rerecorded.hh <- duplicated.hh[
+      !(duplicated.hh$record_id %in% duplicated.records.from.last$record_id), ]
+    
+    rerecorded.hh.area <- table(rerecorded.hh[study.area.column])
+    
+    rerecorded.hh.interviewed <- rerecorded.hh[rerecorded.hh$consent == 1, ]
+    rerecorded.hh.interviewed.area <- table(
+      rerecorded.hh.interviewed[study.area.column]
+    )
+    
+    non.interviewed <- MySQLUnion(
+      non.interviewed.visits.number.area, 
+      non.interviewed.duplicated.records.area
+    )
+    if (ncol(non.interviewed) > 0) {
+      non.interviewed.totals <- non.interviewed[1, ] - non.interviewed[2, ]
+    } else {  # empty table
+      non.interviewed.totals <- non.interviewed.visits.number.area
+    }
+    
+    interviewed <- MySQLUnion(
+      interviewed.number.area, 
+      interviewed.duplicated.records.area
+    )
+    if (ncol(interviewed) > 0) {
+      interviewed.totals <- interviewed[1, ] - interviewed[2, ]
+    } else {  # empty table
+      interviewed.totals <- interviewed.number.area 
+    }
+      
+    #browser()
+    duplicates.summary <- MySQLUnion(
+      non.interviewed.visits.number.area,
+      interviewed.number.area,
+      non.interviewed.duplicated.records.area,
+      interviewed.duplicated.records.area,
+      non.interviewed.totals,
+      interviewed.totals,
+      rerecorded.hh.area,
+      rerecorded.hh.interviewed.area
+    )
+    row.names(duplicates.summary) <- c(
+      "NON interviewed HH", 
+      "Interviewed HH", 
+      "Duplicated records in NON interviewed HH",
+      "Duplicated records in interviewed HH",
+      "NON interviewed HH without duplicated records",
+      "Interviewed HH without duplicated records",
+      "Reused HH IDs",
+      "Reused HH IDs in interviewed HH"
+    )
+    colnames(duplicates.summary) <- paste0("C", colnames(duplicates.summary))
+    
+    duplicates.summary.reduced <- duplicates.summary[, 
+      duplicates.summary[3, ] != 0 | duplicates.summary[4, ] != 0 | 
+        duplicates.summary[7, ] != 0, drop = F]
+    
+    # TODO(maxramirez84): Manage tables of study areas with duplicates found in 
+    # a high number of clusters.
+    if (ncol(duplicates.summary.reduced) > 0) {
+      kable(
+        x      = duplicates.summary.reduced, 
+        format = "html", 
+        escape = F
+      ) %>% kable_styling(
+        bootstrap_options = c("striped", "hover", "responsive"), 
+        font_size         = kFontSize
+      ) %>% row_spec(
+        row               = 0, 
+        bold              = T, 
+        color             = "white", 
+        background        = "#494949"
+      ) %>% row_spec(
+        row               = c(2, 6), 
+        bold              = T
+      )
+    } else {
+      print("There are no duplicates.") 
+    }
+  } else {
+    print("There is no data.")
+  }
+}
