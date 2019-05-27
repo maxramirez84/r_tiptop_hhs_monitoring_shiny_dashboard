@@ -105,7 +105,12 @@ ui <- fluidPage(
   # Summary of duplicates in first area subsection
   h3(paste("Summary of duplicates in", kStudyAreas[1])),
   
-  htmlOutput("summary.duplicates.of.area1")
+  htmlOutput("summary.duplicates.of.area1"),
+  
+  # Summary of duplicates in second area subsection
+  h3(paste("Summary of duplicates in", kStudyAreas[2])),
+  
+  htmlOutput("summary.duplicates.of.area2")
 )
 
 # Define server logic for the monitoring dashboard app
@@ -194,6 +199,14 @@ server <- function(input, output) {
     DuplicatesSummary(
       hhs.data, 
       study.area.id = kStudyAreasIds[1]
+    )
+  })
+  
+  # Table: Summary of duplicates in second area when user access the shiny app
+  output$summary.duplicates.of.area2 <- renderText({
+    DuplicatesSummary(
+      hhs.data, 
+      study.area.id = kStudyAreasIds[2]
     )
   })
 }
