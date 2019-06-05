@@ -139,6 +139,102 @@ RecruitmentRate <- function(hhs.data, sample.size.area1, sample.size.area2) {
   recruitment
 }
 
+CIPTpKnowledgeRate <- function(hhs.data) {
+  # Compute the c-IPTp knowledge rate from the dataset previously exported from 
+  # REDCap.
+  #
+  # Args:
+  #   hhs.data:          Data frame containing all the records of a REDCap 
+  #                      project.
+  #
+  # Returns:
+  #   A vector with the knowledge rate of first and second study areas.
+  consented <- NumberOfparticipantsWhoConsented(hhs.data)
+  
+  know.ciptp.area1 <- table(hhs.data$know_about_ciptp[hhs.data$district == 1])
+  know.ciptp.area2 <- table(hhs.data$know_about_ciptp[hhs.data$district == 2])
+  
+  ciptp.knowledge <- c(
+    if (is.na(consented[1])) {
+      0 
+    } else {
+      floor(
+        (
+          if (is.na(know.ciptp.area1[2])) {
+            0 
+          } else {
+            know.ciptp.area1[2] / consented[1] * 100
+          }
+        ) 
+      ) 
+    },
+    if (is.na(consented[2])) {
+      0 
+    } else {
+      floor(
+        (
+          if (is.na(know.ciptp.area2[2])) {
+            0 
+          } else {
+            know.ciptp.area2[2] / consented[2] * 100
+          }
+        )
+      )
+    }
+  )
+  names(ciptp.knowledge) = c(1, 2)
+  
+  ciptp.knowledge
+}
+
+CIPTpAdministrationRate <- function(hhs.data) {
+  # Compute the c-IPTp administration rate (women who took SP at community
+  # level) from the dataset previously exported from REDCap.
+  #
+  # Args:
+  #   hhs.data:          Data frame containing all the records of a REDCap 
+  #                      project.
+  #
+  # Returns:
+  #   A vector with the administration rate of first and second study areas.
+  consented <- NumberOfparticipantsWhoConsented(hhs.data)
+  
+  admin.ciptp.area1 <- table(hhs.data$sp_community[hhs.data$district == 1])
+  admin.ciptp.area2 <- table(hhs.data$sp_community[hhs.data$district == 2])
+  
+  ciptp.admin <- c(
+    if (is.na(consented[1])) {
+      0 
+    } else {
+      floor(
+        (
+          if (is.na(admin.ciptp.area1[2])) {
+            0 
+          } else {
+            admin.ciptp.area1[2] / consented[1] * 100
+          }
+        )
+      )
+    },
+    if (is.na(consented[2])) {
+      0 
+    } else {
+      floor(
+        (
+          if (is.na(admin.ciptp.area2[2])) {
+            0 
+          } else {
+            admin.ciptp.area2[2] / consented[2] * 100
+          }
+        )
+      )
+    }
+  )
+  names(ciptp.admin) = c(1, 2)
+  
+  ciptp.admin
+}
+
 MySQLUnion <- function(...) {
   # Behaves as MySQL UNION statement. Appends a list just below the other.
   #
