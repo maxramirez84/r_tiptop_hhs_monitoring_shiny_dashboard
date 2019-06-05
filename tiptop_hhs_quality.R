@@ -18,9 +18,17 @@
 library(redcapAPI)
 library(kableExtra)
 
-# Color palette, font size
+# Color palette
 kColorPalette <- c("gray8", "gray35", "gray90")
-kFontSize     <- 10
+
+# Kable style
+kKableFontSize         <- 10
+kKableFormat           <- "html"
+kKableEscape           <- F
+kKableBootstrapOptions <- c("striped", "hover", "responsive")
+kKableHeaderBold       <- T
+kKableHeaderColor      <- "white"
+kKableHeaderBackground <- "#494949"
 
 ReadData <- function(api.url, api.token) {
   # Export dataset from the REDCap project identified by the token and through
@@ -682,16 +690,16 @@ GenerateStudyProfileKable <- function(study.profile) {
   # clusters.
   kable(
     x                 = study.profile, 
-    format            = "html", 
-    escape            = F
+    format            = kKableFormat, 
+    escape            = kKableEscape
   ) %>% kable_styling(
-    bootstrap_options = c("striped", "hover", "responsive"), 
-    font_size         = kFontSize
+    bootstrap_options = kKableBootstrapOptions, 
+    font_size         = kKableFontSize
   ) %>% row_spec(
     row               = 0, 
-    bold              = T, 
-    color             = "white", 
-    background        = "#494949"
+    bold              = kKableHeaderBold, 
+    color             = kKableHeaderColor, 
+    background        = kKableHeaderBackground
   ) %>% row_spec(
     row               = c(1, 2, 3, 14), 
     bold              = T
@@ -876,16 +884,16 @@ GenerateDuplicatesSummaryKable <- function(duplicates.summary) {
   # a high number of clusters.
   kable(
     x                 = duplicates.summary, 
-    format            = "html", 
-    escape            = F
+    format            = kKableFormat, 
+    escape            = kKableEscape
   ) %>% kable_styling(
-    bootstrap_options = c("striped", "hover", "responsive"), 
-    font_size         = kFontSize
+    bootstrap_options = kKableBootstrapOptions, 
+    font_size         = kKableFontSize
   ) %>% row_spec(
     row               = 0, 
-    bold              = T, 
-    color             = "white", 
-    background        = "#494949"
+    bold              = kKableHeaderBold, 
+    color             = kKableHeaderColor, 
+    background        = kKableHeaderBackground
   ) %>% row_spec(
     row               = c(2, 6), 
     bold              = T
