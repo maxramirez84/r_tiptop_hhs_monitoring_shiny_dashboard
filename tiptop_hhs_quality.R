@@ -30,6 +30,9 @@ kKableHeaderBold       <- T
 kKableHeaderColor      <- "white"
 kKableHeaderBackground <- "#494949"
 
+# Prefix of the study area column in the REDCap instrument
+kStudyAreaColumnPrefix <- "cluster_"
+
 ReadData <- function(api.url, api.token) {
   # Export dataset from the REDCap project identified by the token and through
   # the API.
@@ -218,7 +221,12 @@ VisitedHouseholdsArea <- function(hhs.data, households.to.be.visited.area1,
   #
   #   Returns:
   #     It does not return anything directly but it plots the described Vis.
-  #browser()
+  kTextVisitedHH   <- "Visited Households per Area"
+  kTextNumHH       <- "Number of households"
+  kTextStudyAreas  <- "Study areas"
+  kTextInterviewed <- "Interviewed"
+  kTextVisited     <- "Visited"
+  
   kInterval <- 100
   max.x.axis <- max(
     households.to.be.visited.area1, 
@@ -266,9 +274,9 @@ VisitedHouseholdsArea <- function(hhs.data, households.to.be.visited.area1,
     ), 
     horiz       = T, 
     names.arg   = study.areas, 
-    main        = "Visited Households per Area",
-    xlab        = "Number of households",
-    ylab        = "Study areas",
+    main        = kTextVisitedHH,
+    xlab        = kTextNumHH,
+    ylab        = kTextStudyAreas,
     xlim        = c(0, max.x.axis),
     axes        = F,
     beside      = T,
@@ -277,7 +285,7 @@ VisitedHouseholdsArea <- function(hhs.data, households.to.be.visited.area1,
   axis(1, seq(0, max.x.axis, kInterval))
   legend(
     x      = "topright", 
-    legend = c("Interviewed", "Visited"), 
+    legend = c(kTextInterviewed, kTextVisited), 
     fill   = kColorPalette[2:3], 
     cex    = 1.5
   )
@@ -313,8 +321,14 @@ ProgressOfArea <- function(hhs.data, study.area.id, study.area.name, interval,
   #
   # Returns:
   #   It does not return anything directly but it plots the described Vis.
-  #browser()
-  study.area.column <- paste0("cluster_", study.area.id)
+  kTextVisitedHH   <- "Visited Households per Cluster in"
+  kTextCluster     <- "Cluster in"
+  kTextNumHH       <- "Number of households"
+  kTextInterviewed <- "Interviewed"
+  kTextVisited     <- "Visited"
+  kTextNoData      <- "There is no data."
+  
+  study.area.column <- paste0(kStudyAreaColumnPrefix, study.area.id)
   
   visits.number <- table(hhs.data[study.area.column])
   if (length(visits.number) > 0) {
@@ -328,9 +342,9 @@ ProgressOfArea <- function(hhs.data, study.area.id, study.area.name, interval,
     par(cex.lab = 1.5, cex.main = 2, cex.axis = 1.05, mar = c(8, 8, 4, 0))
     visits.progress = barplot(
       height = matrix(c(dat[2,], dat[1,] - dat[2,]), nrow = 2, byrow = T),
-      main   = paste("Visited Households per Cluster in", study.area.name),
-      xlab   = paste("Cluster in", study.area.name),
-      ylab   = "Number of households",
+      main   = paste(kTextVisitedHH, study.area.name),
+      xlab   = paste(kTextCluster, study.area.name),
+      ylab   = kTextNumHH,
       ylim   = c(0, max.y.axis),
       axes   = F,
       col    = kColorPalette[2:3],
@@ -341,7 +355,7 @@ ProgressOfArea <- function(hhs.data, study.area.id, study.area.name, interval,
     abline(h = required.visits.mean, lwd = 1, lty = 2, col = "red")
     legend(
       x      = "topright", 
-      legend = c("Interviewed", "Visited"), 
+      legend = c(kTextInterviewed, kTextVisited), 
       fill   = kColorPalette[2:3], 
       cex    = 1.5
     )
@@ -352,7 +366,7 @@ ProgressOfArea <- function(hhs.data, study.area.id, study.area.name, interval,
       pos    = 3, 
       col    = kColorPalette[1])
   } else {
-    print("There is no data.") 
+    print(paste0("<span>", kTextNoData, "</span>")) 
   }
 }
 
@@ -371,6 +385,23 @@ BuildStudyProfileTable <- function(hhs.data, study.area.column) {
   # Returns:
   #   A data frame representing the study profile of the area. Or NULL if there
   #   is no observations in the area.
+  kTextHHVisited       <- "HH selected visited" 
+  kTextHHInterviewed   <- "HH selected interviewed"
+  kTextChildbearingAge <- "Women of childbearing age"
+  kTextNonEligible     <- "NON eligible women"
+  kTextEligible        <- "Eligible women"
+  kTextSelected        <- "Eligible women selected"
+  kTextInterviewed     <- "Women interviewed"
+  kTextInterrupted     <- "Women that interrupted interview"
+  kTextNonInterviewed  <- "Women NON interviewed"
+  kTextDenied          <- "Denied signed consent/assent"
+  kTextAbsent          <- "Absent"
+  kTextUnabled         <- "Not able to respond"
+  kTextOther           <- "Other reason"
+  kTextNotInterviewed  <- "HH selected NOT interviewed"
+  kTextEmpty           <- "Empty/destroyed"
+  kTextNotFound        <- "HH head not found"
+  kTextRefused         <- "HH head/other refused to consent the interview"
   
   # Households selected and visited, i.e. there's a record collected in it
   number.hh.selected.visited <- table(hhs.data[study.area.column])
@@ -542,23 +573,23 @@ BuildStudyProfileTable <- function(hhs.data, study.area.column) {
     number.hh.head.refused
   )
   row.names(study.profile) <- c(
-    "HH selected visited", 
-    "HH selected interviewed", 
-    "Women of childbearing age",
-    paste0("NON eligible women", footnote_marker_symbol(1, "html")),
-    "Eligible women",
-    "Eligible women selected",
-    "Women interviewed",
-    "Women that interrupted interview",
-    "Women NON interviewed",
-    "Denied signed consent/assent",
-    "Absent",
-    "Not able to respond",
-    "Other reason",
-    "HH selected NOT interviewed",
-    "Empty/destroyed",
-    paste0("HH head not found", footnote_marker_symbol(2, "html")),
-    "HH head/other refused to consent the interview"
+    kTextHHVisited, 
+    kTextHHInterviewed, 
+    kTextChildbearingAge,
+    paste0(kTextNonEligible, footnote_marker_symbol(1, "html")),
+    kTextEligible,
+    kTextSelected,
+    kTextInterviewed,
+    kTextInterrupted,
+    kTextNonInterviewed,
+    kTextDenied,
+    kTextAbsent,
+    kTextUnabled,
+    kTextOther,
+    kTextNotInterviewed,
+    kTextEmpty,
+    paste0(kTextNotFound, footnote_marker_symbol(2, "html")),
+    kTextRefused
   )
   colnames(study.profile) <- paste0("C", colnames(study.profile))
   
@@ -576,24 +607,34 @@ CheckStudyProfile <- function(study.profile) {
   # Returns:
   #   A data frame representing a styled study profile, i.e. values contained in 
   #   the data frame are encapsulated in HTML tags which style each cell.
+  kTextNonInterviewedHH   <- "NOT interviewed HH must be equal to the sum of empty/destroyed + refused"
+  kTextWomen              <- "Women must be equal to the sum of eligibles + NON eligibles"
+  kTextNonInterviwedWomen <- "NON interviewed women must be equal to the sum of denied + absent + unabled"
+  kTextWomenSelected      <- "Women selected must be equal to the sum of interviewed + interrupted + NON interviewed"
+  kTextVisitedHH          <- "Visited HH must be equal to the sum of interviewed + NOT interviewed"
+  
+  # Warning style
+  kWarningFormat  <- "html"
+  kWarningColor   <- "red"
+  kNoWarningColor <- ""
+  
   # Consistency checks within the study profile
   study.profile.checked <- study.profile
   for (i in colnames(study.profile)) {
     # non_interviewed HH = empty + refused
     study.profile.checked[c(14, 15, 17), i] <- cell_spec(
       x        = study.profile[c(14, 15, 17), i],
-      format   = "html",
+      format   = kWarningFormat,
       color    = ifelse(
         test   = study.profile[15, i] + 
           study.profile[17, i] != study.profile[14, i], 
-        yes    = "red", 
-        no     = ""
+        yes    = kWarningColor, 
+        no     = kNoWarningColor
       ),
       tooltip  = ifelse(
         test   = study.profile[15, i] + 
           study.profile[17, i] != study.profile[14, i], 
-        yes    = paste("NOT interviewed HH must be equal to the sum of", 
-                       "empty/destroyed + refused"), 
+        yes    = kTextNonInterviewedHH, 
         no     = ""
       )
     )
@@ -601,17 +642,17 @@ CheckStudyProfile <- function(study.profile) {
     # women = eligible + non_eligible
     study.profile.checked[c(3, 4, 5), i] <- cell_spec(
       x        = study.profile[c(3, 4, 5), i],
-      format   = "html",
+      format   = kWarningFormat,
       color    = ifelse(
         test   = study.profile[4, i] + 
           study.profile[5, i] != study.profile[3, i], 
-        yes    = "red", 
-        no     = ""
+        yes    = kWarningColor, 
+        no     = kNoWarningColor
       ),
       tooltip  = ifelse(
         test   = study.profile[4, i] + 
           study.profile[5, i] != study.profile[3, i], 
-        yes    = "Women must be equal to the sum of eligibles + NON eligibles", 
+        yes    = kTextWomen, 
         no     = ""
       )
     )
@@ -619,18 +660,17 @@ CheckStudyProfile <- function(study.profile) {
     # non_interviwed women = denied + absent + unabled + other
     study.profile.checked[c(9, 10, 11, 12, 13), i] <- cell_spec(
       x        = study.profile[c(9, 10, 11, 12, 13), i],
-      format   = "html",
+      format   = kWarningFormat,
       color    = ifelse(
         test   = study.profile[10, i] + study.profile[11, i] + 
           study.profile[12, i] + study.profile[13, i] != study.profile[9, i], 
-        yes    = "red", 
-        no     = ""
+        yes    = kWarningColor, 
+        no     = kNoWarningColor
       ),
       tooltip  = ifelse(
         test   = study.profile[10, i] + study.profile[11, i] + 
           study.profile[12, i] + study.profile[13, i] != study.profile[9, i], 
-        yes    = paste("NON interviewed women must be equal to the sum of", 
-                       "denied + absent + unabled"), 
+        yes    = kTextNonInterviwedWomen, 
         no     = ""
       )
     )
@@ -638,18 +678,17 @@ CheckStudyProfile <- function(study.profile) {
     # women selected = interviewed + interrupted + non_interviewed
     study.profile.checked[c(6, 7, 8, 9), i] <- cell_spec(
       x        = study.profile[c(6, 7, 8, 9), i],
-      format   = "html",
+      format   = kWarningFormat,
       color    = ifelse(
         test   = study.profile[7, i] + study.profile[8, i] + 
           study.profile[9, i] != study.profile[6, i], 
-        yes    = "red", 
-        no     = ""
+        yes    = kWarningColor, 
+        no     = kNoWarningColor
       ),
       tooltip  = ifelse(
         test   = study.profile[7, i] + study.profile[8, i] + 
           study.profile[9, i] != study.profile[6, i], 
-        yes    = paste("Women selected must be equal to the sum of", 
-                       "interviewed + interrupted + NON interviewed"), 
+        yes    = kTextWomenSelected, 
         no     = ""
       )
     )
@@ -657,18 +696,17 @@ CheckStudyProfile <- function(study.profile) {
     # visited HH = interviewed + non_interviewed
     study.profile.checked[c(1, 2, 14), i] <- cell_spec(
       x        = study.profile[c(1, 2, 14), i],
-      format   = "html",
+      format   = kWarningFormat,
       color    = ifelse(
         test   = study.profile[2, i] + 
           study.profile[14, i] != study.profile[1, i], 
-        yes    = "red", 
-        no     = ""
+        yes    = kWarningColor, 
+        no     = kNoWarningColor
       ),
       tooltip  = ifelse(
         test   = study.profile[2, i] + 
           study.profile[14, i] != study.profile[1, i], 
-        yes    = paste("Visited HH must be equal to the sum of", 
-                       "interviewed + NOT interviewed"), 
+        yes    = kTextVisitedHH, 
         no     = ""
       )
     )
@@ -688,6 +726,11 @@ GenerateStudyProfileKable <- function(study.profile) {
   #   An HTML styled table representing the study profile.
   # TODO(maxramirez84): Manage profiles of study areas with a high number of
   # clusters.
+  kTextTitleFootNote        <- "Notes:"
+  kTextGeneralFootNote      <- "Colored cells are consistency errors. Hover over these cells to display a tooltip with the error message. Please, refer to the provided Data Queries Sheet."
+  kTextNoteNonEligibleWomen <- "Eligible woman: woman that meets selection criteria 1 and selection criteria 2"
+  kTextNoteHeadNotFound     <- "HH head availability is not required to proceed with the interview as long as any other adult consents"
+ 
   kable(
     x                 = study.profile, 
     format            = kKableFormat, 
@@ -706,17 +749,9 @@ GenerateStudyProfileKable <- function(study.profile) {
   ) %>% add_indent(
     positions         = c(10, 11, 12, 13)
   ) %>% footnote(
-    general_title     = "Notes:",
-    general           = paste("Colored cells are consistency errors.", 
-                              "Hover over these cells to display a  tooltip", 
-                              "with the error message. Please, refer to the", 
-                              "provided Data Queries Sheet."), 
-    symbol            = c(
-      paste("Eligible woman: woman that meets selection criteria 1 and", 
-            "selection criteria 2"),
-      paste("HH head availability is not required to proceed with the", 
-            "interview as long as any other adult consents")
-    )
+    general_title     = kTextTitleFootNote,
+    general           = kTextGeneralFootNote, 
+    symbol            = c(kTextNoteNonEligibleWomen, kTextNoteHeadNotFound)
   )
 }
 
@@ -730,11 +765,13 @@ StudyProfileOfArea <- function(hhs.data, study.area.id) {
   #
   # Returns:
   #   An HTML styled table representing the study profile of the area.
-  study.area.column <- paste0("cluster_", study.area.id)
+  kTextNoData <- "There is no data."
+  
+  study.area.column <- paste0(kStudyAreaColumnPrefix, study.area.id)
   
   study.profile.table <- BuildStudyProfileTable(hhs.data, study.area.column)
   if (is.null(study.profile.table)) {
-    return("<span>There is no data.</span>")
+    return(paste0("<span>", kTextNoData, "</span>"))
   }
   
   study.profile.checked <- CheckStudyProfile(study.profile.table)
@@ -762,6 +799,14 @@ BuildDuplicatesSummaryTable <- function(hhs.data, study.area.column) {
   # Returns:
   #   A data frame summarizing the duplicates of the area. Or NULL if there is
   #   no duplicates.
+  kTextNonInterviewedHH         <- "NON interviewed HH"
+  kTextInterviewedHH            <- "Interviewed HH" 
+  kTextDupsNonInterviewedHH     <- "Duplicated records in NON interviewed HH"
+  kTextDupsInterviewedHH        <- "Duplicated records in interviewed HH"
+  kTextNonInterviewedHHNoDups   <- "NON interviewed HH without duplicated records"
+  kTextInterviewedHHNoDups      <- "Interviewed HH without duplicated records"
+  kTextReusedHHIDs              <- "Reused HH IDs"
+  kTextReusedHHIDsInterviewedHH <- "Reused HH IDs in interviewed HH"
   
   # Visited households but NON interviewed, i.e. the interviewer didn't get to
   # request the consent or the consent was rejected
@@ -852,14 +897,14 @@ BuildDuplicatesSummaryTable <- function(hhs.data, study.area.column) {
     rerecorded.hh.interviewed.area
   )
   row.names(duplicates.summary) <- c(
-    "NON interviewed HH", 
-    "Interviewed HH", 
-    "Duplicated records in NON interviewed HH",
-    "Duplicated records in interviewed HH",
-    "NON interviewed HH without duplicated records",
-    "Interviewed HH without duplicated records",
-    "Reused HH IDs",
-    "Reused HH IDs in interviewed HH"
+    kTextNonInterviewedHH,
+    kTextInterviewedHH,
+    kTextDupsNonInterviewedHH,
+    kTextDupsInterviewedHH,
+    kTextNonInterviewedHHNoDups,
+    kTextInterviewedHHNoDups,
+    kTextReusedHHIDs,
+    kTextReusedHHIDsInterviewedHH
   )
   colnames(duplicates.summary) <- paste0("C", colnames(duplicates.summary))
     
@@ -914,14 +959,17 @@ DuplicatesSummary <- function(hhs.data, study.area.id) {
   #
   # Returns:
   #   An HTML styled table summarizing the duplicates of the area.
-  study.area.column <- paste0("cluster_", study.area.id)
+  kTextNoData <- "There is no data."
+  kTextNoDuplicates <- "There are no duplicates."
+  
+  study.area.column <- paste0(kStudyAreaColumnPrefix, study.area.id)
   
   duplicates.summary <- BuildDuplicatesSummaryTable(hhs.data, study.area.column)
   if (is.null(duplicates.summary)) {
-    return("<span>There is no data.</span>")
+    return(paste0("<span>", kTextNoData, "</span>"))
   }
   if (ncol(duplicates.summary) == 0) {
-    return("<span>There are no duplicates.</span>")
+    return(paste0("<span>", kTextNoDuplicates, "</span>"))
   }
   
   GenerateDuplicatesSummaryKable(duplicates.summary)
