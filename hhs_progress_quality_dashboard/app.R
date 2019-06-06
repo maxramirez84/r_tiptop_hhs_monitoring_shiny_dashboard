@@ -77,9 +77,10 @@ ui <- navbarPage(
   title    = "TIPTOP Baseline HHS Data Quality Report: MADAGASCAR", 
   position = "fixed-top",
   
+  # Data Quality and Progress Tab
   tabPanel("DQ & Progress", style = kCSSTopNavbarPadding,
     sidebarLayout(
-      
+      # Sidebar: Authorship and control widgets (Date)
       sidebarPanel(width = 2, style = kCSSFixedSidebar,
         em("Máximo Ramírez Robles"),
         br(),
@@ -89,6 +90,7 @@ ui <- navbarPage(
         a("Dashboard GitHub Repository", href = kGitHub)
       ),
       
+      # Main panel: report
       mainPanel(style = kCSSLeftMainPanelPadding,
         # Field data collection progress section
         h2("FIELD DATA COLLECTION PROGRESS"),
@@ -101,21 +103,23 @@ ui <- navbarPage(
         
         # General progress indicators
         fluidRow(
-          column(6,
-                 div(align = "center",
-                     span(paste("Women interviewed @", kStudyAreas[1])),
-                     div(helpText(textOutput("recruited.area1", inline = T)), 
-                         style = kCSSBigNumber),
-                     helpText(textOutput("interviewed.out.of.area1"))
-                 )
+          column(width = 6,
+            div(align = "center",
+              span(paste("Women interviewed @", kStudyAreas[1])),
+              div(style = kCSSBigNumber,
+                helpText(textOutput("recruited.area1", inline = T)) 
+              ),
+              helpText(textOutput("interviewed.out.of.area1"))
+            )
           ),
-          column(6,
-                 div(align = "center",
-                     span(paste("Women interviewed @", kStudyAreas[2])),
-                     div(helpText(textOutput("recruited.area2", inline = T)), 
-                         style = kCSSBigNumber),
-                     helpText(textOutput("interviewed.out.of.area2"))
-                 )
+          column(width = 6,
+            div(align = "center",
+              span(paste("Women interviewed @", kStudyAreas[2])),
+              div(style = kCSSBigNumber,
+                helpText(textOutput("recruited.area2", inline = T)) 
+              ),
+              helpText(textOutput("interviewed.out.of.area2"))
+            )
           )
         ),
         
@@ -159,11 +163,11 @@ ui <- navbarPage(
         
         # Main indicators section
         h2("MAIN INDICATORS"),
-        span("Important:", style = kCSSWarning),
-        span("These indicators are computed by using raw data. Therefore, data has not 
-             passed any verification and/or cleaning process. They should not be used 
-             for analysis purposes. They are presented to address any possible data 
-             issue."),
+        span(style = kCSSWarning, "Important:"),
+        span("These indicators are computed by using raw data. Therefore, data 
+              has not passed any verification and/or cleaning process. They 
+              should not be used for analysis purposes. They are presented to 
+              address any possible data issue."),
         
         # SP indicators subsection
         h3("SP Indicators"),
@@ -171,69 +175,65 @@ ui <- navbarPage(
         fluidRow(
           # Community indicators
           column(6,
-                 # SP service provided in first area widget
-                 div(align = "center",
-                     p(
-                       paste("SP service provided in", kStudyAreas[1], "by CHW (c-IPTp)"),
-                       style = kCSSMinnorHeader
-                     ),
-                     div(
-                       div(
-                         helpText(
-                           textOutput("ciptp.knowledge.area1"), 
-                           style = kCSSMediumNumber
-                         )
-                       ),
-                       span("Women who know"),
-                       style = kCSSLeftIndicatorBox
-                     ),
-                     div(
-                       div(
-                         helpText(
-                           textOutput("ciptp.admin.area1"),
-                           style = paste(kCSSBigNumber, kCSSEmphasis)
-                         )
-                       ),
-                       span("Women who took", style =  paste("color:", kBlueEmphasis)),
-                       style = kCSSRightIndicatorBox
-                     ),
-                     style = kCSSIndicatorsWidget
-                 ),
-                 br(),
-                 # SP service provided in second area widget
-                 div(align = "center",
-                     p(
-                       paste("SP service provided in", kStudyAreas[2], "by CHW (c-IPTp)"),
-                       style = kCSSMinnorHeader
-                     ),
-                     div(
-                       div(
-                         helpText(
-                           textOutput("ciptp.knowledge.area2"), 
-                           style = kCSSMediumNumber
-                         )
-                       ),
-                       span("Women who know"),
-                       style = kCSSLeftIndicatorBox
-                     ),
-                     div(
-                       div(
-                         helpText(
-                           textOutput("ciptp.admin.area2"),
-                           style = paste(kCSSBigNumber, kCSSEmphasis)
-                         )
-                       ),
-                       span("Women who took", style =  paste("color:", kBlueEmphasis)),
-                       style = kCSSRightIndicatorBox
-                     )
-                 ),
-                 style = kCSSIndicatorsWidget
+            # SP service provided infirst area widget
+            div(align = "center", style = kCSSIndicatorsWidget,
+              p(style = kCSSMinnorHeader,
+                paste(
+                  "SP service provided in", 
+                  kStudyAreas[1], 
+                  "by CHW (c-IPTp)"
+                )
+              ),
+              div(style = kCSSLeftIndicatorBox,
+                div(
+                  helpText(style = kCSSMediumNumber,
+                    textOutput("ciptp.knowledge.area1")
+                  )
+                ),
+                span("Women who know")
+              ),
+              div(style = kCSSRightIndicatorBox,
+                div(
+                  helpText(style = paste(kCSSBigNumber, kCSSEmphasis),
+                    textOutput("ciptp.admin.area1")
+                  )
+                ),
+                span(style =  paste("color:", kBlueEmphasis), "Women who took")
+              )
+            ),
+            br(),
+            # SP service provided in second area widget
+            div(align = "center", style = kCSSIndicatorsWidget,
+              p(style = kCSSMinnorHeader,
+                paste(
+                  "SP service provided in", 
+                  kStudyAreas[2], 
+                  "by CHW (c-IPTp)"
+                )
+              ),
+              div(style = kCSSLeftIndicatorBox,
+                div(
+                  helpText(style = kCSSMediumNumber,
+                    textOutput("ciptp.knowledge.area2")
+                  )
+                ),
+                span("Women who know")
+              ),
+              div(style = kCSSRightIndicatorBox,
+                div(
+                  helpText(style = paste(kCSSBigNumber, kCSSEmphasis),
+                    textOutput("ciptp.admin.area2")
+                  )
+                ),
+                span(style =  paste("color:", kBlueEmphasis), "Women who took")
+              )
+            )
           ),
           # Global SP adherence indicators
           column(6,
-                 div(align = "center",
-                     htmlOutput("sp.indicators")
-                 )
+            div(align = "center",
+              htmlOutput("sp.indicators")
+            )
           )
         ),
         
