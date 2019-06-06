@@ -38,10 +38,8 @@ kBlueEmphasis <- "#31708f"
 
 # CSS rules
 kCSSMediumNumber <- "font-size: 40px;"
-kCSSBigNumber <- paste(
-  "font-size: 95px;",
-  "color:", kBlueEmphasis
-)
+kCSSBigNumber <- "font-size: 95px;"
+kCSSEmphasis <- paste("color:", kBlueEmphasis, ";")
 kCSSLeftIndicatorBox <- paste(
   "text-align: right;", 
   "position: absolute;", 
@@ -58,6 +56,10 @@ kCSSRightIndicatorBox <- paste(
 kCSSIndicatorsWidget <- paste(
   "position: relative;", 
   "overflow: auto;"
+)
+kCSSWarning <- paste(
+  "color: red;", 
+  "font-weight: bold;"
 )
 
 # Define UI for the monitoring dashboard app
@@ -87,7 +89,7 @@ ui <- fluidPage(
       div(align = "center",
         span(paste("Women interviewed @", kStudyAreas[1])),
         div(helpText(textOutput("recruited.area1", inline = T)), 
-            style = "font-size: 95px"),
+            style = kCSSBigNumber),
         helpText(textOutput("interviewed.out.of.area1"))
       )
     ),
@@ -95,7 +97,7 @@ ui <- fluidPage(
       div(align = "center",
         span(paste("Women interviewed @", kStudyAreas[2])),
         div(helpText(textOutput("recruited.area2", inline = T)), 
-            style = "font-size: 95px"),
+            style = kCSSBigNumber),
         helpText(textOutput("interviewed.out.of.area2"))
       )
     )
@@ -141,7 +143,7 @@ ui <- fluidPage(
   
   # Main indicators section
   h2("MAIN INDICATORS"),
-  span("Important:", style = "color: red; font-weight: bold"),
+  span("Important:", style = kCSSWarning),
   span("These indicators are computed by using raw data. Therefore, data has not 
        passed any verification and/or cleaning process. They should not be used 
        for analysis purposes. They are presented to address any possible data 
@@ -169,7 +171,7 @@ ui <- fluidPage(
           div(
             helpText(
               textOutput("ciptp.admin.area1"),
-              style = kCSSBigNumber
+              style = paste(kCSSBigNumber, kCSSEmphasis)
             )
           ),
           span("Women who took", style =  paste("color:", kBlueEmphasis)),
@@ -195,7 +197,7 @@ ui <- fluidPage(
           div(
             helpText(
               textOutput("ciptp.admin.area2"),
-              style = kCSSBigNumber
+              style = paste(kCSSBigNumber, kCSSEmphasis)
             )
           ),
           span("Women who took", style =  paste("color:", kBlueEmphasis)),
