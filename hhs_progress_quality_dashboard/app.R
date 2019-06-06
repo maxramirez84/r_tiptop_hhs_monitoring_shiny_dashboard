@@ -214,9 +214,9 @@ ui <- fluidPage(
       style = kCSSIndicatorsWidget
     ),
     column(6,
-           div(align = "center",
-               "Column2"
-           )
+      div(align = "center",
+        htmlOutput("sp.indicators")
+      )
     )
   )
 )
@@ -336,6 +336,14 @@ server <- function(input, output) {
   })
   output$ciptp.admin.area2 <- renderText({
     paste0(ciptp.admin[2], "%")
+  })
+  
+  # Table: SP indicators when user access the shiny app
+  output$sp.indicators <- renderText({
+    SPIndicators(
+      hhs.data, 
+      study.areas = kStudyAreas
+    )
   })
 }
 

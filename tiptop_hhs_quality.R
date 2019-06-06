@@ -23,6 +23,7 @@ kColorPalette <- c("gray8", "gray35", "gray90")
 
 # Kable style
 kKableFontSize         <- 10
+kKableFontSizeLarge    <- 12
 kKableFormat           <- "html"
 kKableEscape           <- F
 kKableBootstrapOptions <- c("striped", "hover", "responsive")
@@ -1069,4 +1070,158 @@ DuplicatesSummary <- function(hhs.data, study.area.id) {
   }
   
   GenerateDuplicatesSummaryKable(duplicates.summary)
+}
+
+GenerateSPIndicatorsKable <- function(sp.adherence) {
+  # Generate kable table (HTML output) to display the provided SP indicators.
+  #
+  # Args:
+  #   sp.adherence: A data frame representing a styled or non-styled SP 
+  #                 indicators table.
+  #
+  # Returns:
+  #   An HTML styled table displaying the SP indicators.
+  kable(
+    x                 = sp.adherence, 
+    format            = kKableFormat, 
+    escape            = kKableEscape
+  ) %>% kable_styling(
+    bootstrap_options = kKableBootstrapOptions, 
+    font_size         = kKableFontSizeLarge
+  ) %>% row_spec(
+    row               = 0, 
+    bold              = kKableHeaderBold, 
+    color             = kKableHeaderColor, 
+    background        = kKableHeaderBackground
+  ) %>% row_spec(
+    row               = c(1, 2, 10, 11), 
+    bold              = T
+  ) %>% add_indent(
+    positions         = c(3, 4, 5, 6, 7, 8, 9)
+  )
+}
+
+SPIndicators <- function(hhs.data, study.areas) {
+  # Compute a table using kable (HTML output) displaying the SP indicators of 
+  # both study areas.
+  #
+  # Args:
+  #   hhs.data:    Data frame containing all the records of a REDCap project.
+  #   study.areas: Vector with the two names of study areas.
+  #
+  # Returns:
+  #   An HTML styled table displaying the SP indicators of both study areas.
+  kTextInterviewed    <- "Women interviewed"
+  kTextTookSP         <- "Women that took SP"
+  kText1Dose          <- "Women that took exactly 1 dose of SP"
+  kTextiDoses         <- "Women that took exactly %i doses of SP"
+  kTextMoreThaniDoses <- "Women that took more than % doses of SP"
+  kTextNotTook        <- "Women that didn't take SP"
+  kTextNotKnow        <- "Women that didn't know if they took SP"
+  
+  consented <- NumberOfparticipantsWhoConsented(hhs.data)
+  
+  sp.area1 <- table(hhs.data$sp[hhs.data$district == 1])
+  sp.area2 <- table(hhs.data$sp[hhs.data$district == 2])
+  sp <- t(MySQLUnion(sp.area1, sp.area2))
+  
+  sp.doses.area1 <- table(hhs.data$sp_doses_number[hhs.data$district == 1])
+  sp.doses.area2 <- table(hhs.data$sp_doses_number[hhs.data$district == 2])
+  sp.doses <- t(MySQLUnion(sp.doses.area1, sp.doses.area2))
+  
+  sp.adherence <- MySQLUnion(
+    consented,
+    if ('1' %in% rownames(sp)) {
+      sp['1', ]
+    } else {
+      c(0, 0)
+    },
+    if ('1' %in% rownames(sp.doses)) {
+      sp.doses['1', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('2' %in% rownames(sp.doses)) {
+      sp.doses['2', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('3' %in% rownames(sp.doses)) {
+      sp.doses['3', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('4' %in% rownames(sp.doses)) {
+      sp.doses['4', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('5' %in% rownames(sp.doses)) {
+      sp.doses['5', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('6' %in% rownames(sp.doses)) {
+      sp.doses['6', ] 
+    } else {
+      c(0, 0)
+    },
+    (
+      if ('7' %in% rownames(sp.doses)) {
+        sp.doses['7', ]
+      } else  { 
+        c(0, 0)
+      }
+    ) + (
+      if ('8' %in% rownames(sp.doses)) {
+        sp.doses['8', ] 
+      } else {
+        c(0, 0)
+      }
+    ) + (
+      if ('9' %in% rownames(sp.doses)) {
+        sp.doses['9', ] 
+      } else {
+        c(0, 0)
+      }
+    ),
+    if ('0' %in% rownames(sp)) {
+      sp['0', ] 
+    } else { 
+      c(0, 0)
+    }, 
+    if ('2' %in% rownames(sp)) {
+      sp['2', ] 
+    } else {
+      c(0, 0)
+    }
+  )
+  for (i in 2:11) {
+    sp.adherence[i, ] <- paste(
+      sp.adherence[i, ],
+      paste0(
+        "(", 
+        round((as.integer(sp.adherence[i, ]) / consented) * 100, 2), 
+        "%", 
+        ")"
+      )
+    )
+  }
+
+  row.names(sp.adherence) <- c(
+    kTextInterviewed,
+    kTextTookSP,
+    kText1Dose,
+    sprintf(kTextiDoses, 2),
+    sprintf(kTextiDoses, 3),
+    sprintf(kTextiDoses, 4),
+    sprintf(kTextiDoses, 5),
+    sprintf(kTextiDoses, 6),
+    sprintf(kTextMoreThaniDoses, 6),
+    kTextNotTook,
+    kTextNotKnow
+  )
+  colnames(sp.adherence) <- study.areas
+  
+  GenerateSPIndicatorsKable(sp.adherence)
 }
