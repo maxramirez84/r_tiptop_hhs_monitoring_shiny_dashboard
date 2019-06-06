@@ -154,6 +154,7 @@ ui <- fluidPage(
   h3("SP Indicators"),
   
   fluidRow(
+    # Community indicators
     column(6,
       # SP service provided in first area widget
       div(align = "center",
@@ -213,12 +214,18 @@ ui <- fluidPage(
       ),
       style = kCSSIndicatorsWidget
     ),
+    # Global SP adherence indicators
     column(6,
       div(align = "center",
         htmlOutput("sp.indicators")
       )
     )
-  )
+  ),
+  
+  # ANC indicators subsection
+  h3("ANC Indicators"),
+  
+  htmlOutput("anc.indicators")
 )
 
 # Define server logic for the monitoring dashboard app
@@ -341,6 +348,14 @@ server <- function(input, output) {
   # Table: SP indicators when user access the shiny app
   output$sp.indicators <- renderText({
     SPIndicators(
+      hhs.data, 
+      study.areas = kStudyAreas
+    )
+  })
+  
+  # Table: ANC indicators when user access the shiny app
+  output$anc.indicators <- renderText({
+    ANCIndicators(
       hhs.data, 
       study.areas = kStudyAreas
     )

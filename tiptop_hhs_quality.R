@@ -1225,3 +1225,140 @@ SPIndicators <- function(hhs.data, study.areas) {
   
   GenerateSPIndicatorsKable(sp.adherence)
 }
+
+GenerateANCIndicatorsKable <- function(anc.attendance) {
+  kable(
+    x                 = anc.attendance, 
+    format            = kKableFormat, 
+    escape            = kKableEscape
+  ) %>% kable_styling(
+    bootstrap_options = kKableBootstrapOptions, 
+    font_size         = kKableFontSizeLarge 
+  ) %>% row_spec(
+    row               = 0, 
+    bold              = kKableHeaderBold, 
+    color             = kKableHeaderColor, 
+    background        = kKableHeaderBackground
+  ) %>% row_spec(
+    row               = c(1, 2, 10), 
+    bold              = T
+  ) %>% add_indent(
+    positions         = c(3, 4, 5, 6, 7, 8, 9)
+  )
+}
+
+ANCIndicators <- function(hhs.data, study.areas) {
+  kTextInterviewed       <- "Women interviewed"
+  kTextAttended          <- "Women that attended ANC clinic"
+  kTextAttendedOnce      <- "Women that attended exactly once to ANC clinic"
+  kTextAttendedTwice     <- "Women that attended exactly twice to ANC clinic"
+  kTextAttendediTimes    <- "Women that attended exactly %i times to ANC clinic"
+  kTextAttendedMoreThani <- "Women that attended more than %i times to ANC clinic"
+  kTextNotAttend         <- "Women that didn't attend to ANC clinic"
+  
+  consented <- NumberOfparticipantsWhoConsented(hhs.data)
+  
+  anc.area1 <- table(hhs.data$attend_anc[hhs.data$district == 1])
+  anc.area2 <- table(hhs.data$attend_anc[hhs.data$district == 2])
+  anc <- t(MySQLUnion(anc.area1, anc.area2))
+  
+  anc.visits.area1 <- table(hhs.data$anc_visits_number[hhs.data$district == 1])
+  anc.visits.area2 <- table(hhs.data$anc_visits_number[hhs.data$district == 2])
+  anc.visits <- t(MySQLUnion(anc.visits.area1, anc.visits.area2))
+  
+  anc.attendance <- MySQLUnion(
+    consented,
+    if ('1' %in% rownames(anc)) {
+      anc['1', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('1' %in% rownames(anc.visits)) {
+      anc.visits['1', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('2' %in% rownames(anc.visits)) {
+      anc.visits['2', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('3' %in% rownames(anc.visits)) {
+      anc.visits['3', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('4' %in% rownames(anc.visits)) {
+      anc.visits['4', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('5' %in% rownames(anc.visits)) {
+      anc.visits['5', ] 
+    } else {
+      c(0, 0)
+    },
+    if ('6' %in% rownames(anc.visits)) {
+      anc.visits['6', ] 
+    } else {
+      c(0, 0)
+    },
+    (
+      if ('7' %in% rownames(anc.visits)) {
+        anc.visits['7', ] 
+      } else {
+        c(0, 0)
+      }
+    ) + (
+      if ('8' %in% rownames(anc.visits)) {
+        anc.visits['8', ] 
+      } else {
+        c(0, 0)
+      }
+    ) + (
+      if ('9' %in% rownames(anc.visits)) {
+        anc.visits['9', ] 
+      } else {
+        c(0, 0)
+      }
+    ) + (
+      if ('10' %in% rownames(anc.visits)) {
+        anc.visits['10', ] 
+      } else {
+        c(0, 0)
+      }
+    ),
+    if ('0' %in% rownames(anc)) {
+      anc['0', ] 
+    } else {
+      c(0, 0)
+    }
+  )
+  for (i in 2:10) {
+    anc.attendance[i, ] <- paste(
+      anc.attendance[i, ],
+      paste0(
+        "(", 
+        round((as.integer(anc.attendance[i, ]) / consented) * 100, 2), 
+        "%", 
+        ")"
+      )
+    )
+  }
+  
+  row.names(anc.attendance) <- c(
+    kTextInterviewed,
+    kTextAttended,
+    kTextAttendedOnce,
+    kTextAttendedTwice,
+    sprintf(kTextAttendediTimes, 3),
+    sprintf(kTextAttendediTimes, 4),
+    sprintf(kTextAttendediTimes, 5),
+    sprintf(kTextAttendediTimes, 6),
+    sprintf(kTextAttendedMoreThani, 6),
+    kTextNotAttend
+  )
+  colnames(anc.attendance) <- study.areas
+  
+  GenerateANCIndicatorsKable(anc.attendance)
+}
