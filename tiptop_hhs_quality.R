@@ -1115,7 +1115,7 @@ SPIndicators <- function(hhs.data, study.areas) {
   kTextTookSP         <- "Women that took SP"
   kText1Dose          <- "Women that took exactly 1 dose of SP"
   kTextiDoses         <- "Women that took exactly %i doses of SP"
-  kTextMoreThaniDoses <- "Women that took more than % doses of SP"
+  kTextMoreThaniDoses <- "Women that took more than %i doses of SP"
   kTextNotTook        <- "Women that didn't take SP"
   kTextNotKnow        <- "Women that didn't know if they took SP"
   
