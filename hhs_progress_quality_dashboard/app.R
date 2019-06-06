@@ -39,6 +39,7 @@ kBlueEmphasis <- "#31708f"
 # CSS rules
 kCSSMediumNumber <- "font-size: 40px;"
 kCSSBigNumber <- "font-size: 95px;"
+kCSSMinnorHeader <- "font-size: 18px;"
 kCSSEmphasis <- paste("color:", kBlueEmphasis, ";")
 kCSSLeftIndicatorBox <- paste(
   "text-align: right;", 
@@ -156,7 +157,10 @@ ui <- fluidPage(
     column(6,
       # SP service provided in first area widget
       div(align = "center",
-        p(paste("SP service provided in", kStudyAreas[1], "by CHW (c-IPTp)")),
+        p(
+          paste("SP service provided in", kStudyAreas[1], "by CHW (c-IPTp)"),
+          style = kCSSMinnorHeader
+        ),
         div(
           div(
             helpText(
@@ -182,7 +186,10 @@ ui <- fluidPage(
       br(),
       # SP service provided in second area widget
       div(align = "center",
-        p(paste("SP service provided in", kStudyAreas[2], "by CHW (c-IPTp)")),
+        p(
+          paste("SP service provided in", kStudyAreas[2], "by CHW (c-IPTp)"),
+          style = kCSSMinnorHeader
+        ),
         div(
           div(
             helpText(
