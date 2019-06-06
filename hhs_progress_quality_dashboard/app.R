@@ -36,6 +36,30 @@ kHouseholdsToBeVisitedArea2 <- 1278
 # Colors
 kBlueEmphasis <- "#31708f"
 
+# CSS rules
+kCSSMediumNumber <- "font-size: 40px;"
+kCSSBigNumber <- paste(
+  "font-size: 95px;",
+  "color:", kBlueEmphasis
+)
+kCSSLeftIndicatorBox <- paste(
+  "text-align: right;", 
+  "position: absolute;", 
+  "bottom: 0px;",
+  "width: 50%;",
+  "padding: 0 15px 0 15px;"
+)
+kCSSRightIndicatorBox <- paste(
+  "text-align: left;",
+  "float: right;",
+  "width: 50%;",
+  "padding: 0 15px 0 15px;"
+)
+kCSSIndicatorsWidget <- paste(
+  "position: relative;", 
+  "overflow: auto;"
+)
+
 # Define UI for the monitoring dashboard app
 ui <- fluidPage(
   # Header
@@ -128,43 +152,57 @@ ui <- fluidPage(
   
   fluidRow(
     column(6,
+      # SP service provided in first area widget
       div(align = "center",
         p(paste("SP service provided in", kStudyAreas[1], "by CHW (c-IPTp)")),
         div(
           div(
             helpText(
               textOutput("ciptp.knowledge.area1"), 
-              style = "font-size: 40px"
+              style = kCSSMediumNumber
             )
           ),
           span("Women who know"),
-          style = paste(
-            "text-align: right;", 
-            "position: absolute;", 
-            "bottom: 0px;",
-            "width: 50%;",
-            "padding: 0 15px 0 15px;"
-          )
+          style = kCSSLeftIndicatorBox
         ),
         div(
           div(
             helpText(
               textOutput("ciptp.admin.area1"),
-              style = paste(
-                "font-size: 95px;",
-                "color:", kBlueEmphasis
-              )
+              style = kCSSBigNumber
             )
           ),
           span("Women who took", style =  paste("color:", kBlueEmphasis)),
-          style = paste(
-            "text-align: left;",
-            "float: right;",
-            "width: 50%;",
-            "padding: 0 15px 0 15px;"
-          )
+          style = kCSSRightIndicatorBox
+        ),
+        style = kCSSIndicatorsWidget
+      ),
+      br(),
+      # SP service provided in second area widget
+      div(align = "center",
+        p(paste("SP service provided in", kStudyAreas[2], "by CHW (c-IPTp)")),
+        div(
+          div(
+            helpText(
+              textOutput("ciptp.knowledge.area2"), 
+              style = kCSSMediumNumber
+            )
+          ),
+          span("Women who know"),
+          style = kCSSLeftIndicatorBox
+        ),
+        div(
+          div(
+            helpText(
+              textOutput("ciptp.admin.area2"),
+              style = kCSSBigNumber
+            )
+          ),
+          span("Women who took", style =  paste("color:", kBlueEmphasis)),
+          style = kCSSRightIndicatorBox
         )
-      )
+      ),
+      style = kCSSIndicatorsWidget
     ),
     column(6,
            div(align = "center",
