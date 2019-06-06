@@ -33,6 +33,9 @@ kHouseholdsToBeVisitedArea1 <- 1278
 kSampleSizeArea2            <- 284
 kHouseholdsToBeVisitedArea2 <- 1278
 
+# GitHub repository URL
+kGitHub <- "https://github.com/maxramirez84/r_tiptop_hhs_monitoring_shiny_dashboard"
+
 # Colors
 kBlueEmphasis <- "#31708f"
 
@@ -62,170 +65,185 @@ kCSSWarning <- paste(
   "color: red;", 
   "font-weight: bold;"
 )
+kCSSTopNavbarPadding <- "padding-top: 60px;"
+kCSSFixedSidebar <- paste(
+  "position: fixed;", 
+  "width: inherit;"
+)
+kCSSLeftMainPanelPadding <- "padding-left: 30px;"
 
 # Define UI for the monitoring dashboard app
-ui <- fluidPage(
-  # Header
-  h1("TIPTOP Baseline HHS Data Quality Report: MADAGASCAR"),
-  em("Máximo Ramírez Robles"),
-  br(),
-  em(Sys.time()),
-  br(),
-  img(src = "github_icon.png", width = 30),
-  a("Dashboard GitHub Repository", 
-    href = "https://github.com/maxramirez84/r_tiptop_hhs_monitoring_shiny_dashboard"),
+ui <- navbarPage(
+  title    = "TIPTOP Baseline HHS Data Quality Report: MADAGASCAR", 
+  position = "fixed-top",
+  
+  tabPanel("DQ & Progress", style = kCSSTopNavbarPadding,
+    sidebarLayout(
       
-  # Field data collection progress section
-  h2("FIELD DATA COLLECTION PROGRESS"),
-  helpText(textOutput("records.summary")),
-  span("Data collection by "),
-  a("MANISA", href =  "http://www.manisa.mg/"),
-  
-  # General progress subsection
-  h3("General Progress"),
-  
-  # General progress indicators
-  fluidRow(
-    column(6,
-      div(align = "center",
-        span(paste("Women interviewed @", kStudyAreas[1])),
-        div(helpText(textOutput("recruited.area1", inline = T)), 
-            style = kCSSBigNumber),
-        helpText(textOutput("interviewed.out.of.area1"))
-      )
-    ),
-    column(6,
-      div(align = "center",
-        span(paste("Women interviewed @", kStudyAreas[2])),
-        div(helpText(textOutput("recruited.area2", inline = T)), 
-            style = kCSSBigNumber),
-        helpText(textOutput("interviewed.out.of.area2"))
+      sidebarPanel(width = 2, style = kCSSFixedSidebar,
+        em("Máximo Ramírez Robles"),
+        br(),
+        em(Sys.time()),
+        br(),
+        img(src = "github_icon.png", width = 30),
+        a("Dashboard GitHub Repository", href = kGitHub)
+      ),
+      
+      mainPanel(style = kCSSLeftMainPanelPadding,
+        # Field data collection progress section
+        h2("FIELD DATA COLLECTION PROGRESS"),
+        helpText(textOutput("records.summary")),
+        span("Data collection by "),
+        a("MANISA", href =  "http://www.manisa.mg/"),
+        
+        # General progress subsection
+        h3("General Progress"),
+        
+        # General progress indicators
+        fluidRow(
+          column(6,
+                 div(align = "center",
+                     span(paste("Women interviewed @", kStudyAreas[1])),
+                     div(helpText(textOutput("recruited.area1", inline = T)), 
+                         style = kCSSBigNumber),
+                     helpText(textOutput("interviewed.out.of.area1"))
+                 )
+          ),
+          column(6,
+                 div(align = "center",
+                     span(paste("Women interviewed @", kStudyAreas[2])),
+                     div(helpText(textOutput("recruited.area2", inline = T)), 
+                         style = kCSSBigNumber),
+                     helpText(textOutput("interviewed.out.of.area2"))
+                 )
+          )
+        ),
+        
+        plotOutput("visited.households.per.area"),
+        
+        # Progress in first area subsection
+        h3(paste("Progress in", kStudyAreas[1])),
+        
+        plotOutput("progress.of.area1"),
+        
+        # Progress in second area subsection
+        h3(paste("Progress in", kStudyAreas[2])),
+        
+        plotOutput("progress.of.area2"),
+        
+        # Study profile section
+        h2("STUDY PROFILE"),
+        
+        # Profile of first area subsection
+        h3(paste("Profile of", kStudyAreas[1])),
+        
+        htmlOutput("profile.of.area1"),
+        
+        # Profile of second area subsection
+        h3(paste("Profile of", kStudyAreas[2])),
+        
+        htmlOutput("profile.of.area2"),
+        
+        # Duplicates section
+        h2("DUPLICATES"),
+        
+        # Summary of duplicates in first area subsection
+        h3(paste("Summary of duplicates in", kStudyAreas[1])),
+        
+        htmlOutput("summary.duplicates.of.area1"),
+        
+        # Summary of duplicates in second area subsection
+        h3(paste("Summary of duplicates in", kStudyAreas[2])),
+        
+        htmlOutput("summary.duplicates.of.area2"),
+        
+        # Main indicators section
+        h2("MAIN INDICATORS"),
+        span("Important:", style = kCSSWarning),
+        span("These indicators are computed by using raw data. Therefore, data has not 
+             passed any verification and/or cleaning process. They should not be used 
+             for analysis purposes. They are presented to address any possible data 
+             issue."),
+        
+        # SP indicators subsection
+        h3("SP Indicators"),
+        
+        fluidRow(
+          # Community indicators
+          column(6,
+                 # SP service provided in first area widget
+                 div(align = "center",
+                     p(
+                       paste("SP service provided in", kStudyAreas[1], "by CHW (c-IPTp)"),
+                       style = kCSSMinnorHeader
+                     ),
+                     div(
+                       div(
+                         helpText(
+                           textOutput("ciptp.knowledge.area1"), 
+                           style = kCSSMediumNumber
+                         )
+                       ),
+                       span("Women who know"),
+                       style = kCSSLeftIndicatorBox
+                     ),
+                     div(
+                       div(
+                         helpText(
+                           textOutput("ciptp.admin.area1"),
+                           style = paste(kCSSBigNumber, kCSSEmphasis)
+                         )
+                       ),
+                       span("Women who took", style =  paste("color:", kBlueEmphasis)),
+                       style = kCSSRightIndicatorBox
+                     ),
+                     style = kCSSIndicatorsWidget
+                 ),
+                 br(),
+                 # SP service provided in second area widget
+                 div(align = "center",
+                     p(
+                       paste("SP service provided in", kStudyAreas[2], "by CHW (c-IPTp)"),
+                       style = kCSSMinnorHeader
+                     ),
+                     div(
+                       div(
+                         helpText(
+                           textOutput("ciptp.knowledge.area2"), 
+                           style = kCSSMediumNumber
+                         )
+                       ),
+                       span("Women who know"),
+                       style = kCSSLeftIndicatorBox
+                     ),
+                     div(
+                       div(
+                         helpText(
+                           textOutput("ciptp.admin.area2"),
+                           style = paste(kCSSBigNumber, kCSSEmphasis)
+                         )
+                       ),
+                       span("Women who took", style =  paste("color:", kBlueEmphasis)),
+                       style = kCSSRightIndicatorBox
+                     )
+                 ),
+                 style = kCSSIndicatorsWidget
+          ),
+          # Global SP adherence indicators
+          column(6,
+                 div(align = "center",
+                     htmlOutput("sp.indicators")
+                 )
+          )
+        ),
+        
+        # ANC indicators subsection
+        h3("ANC Indicators"),
+        
+        htmlOutput("anc.indicators")
       )
     )
-  ),
-  
-  plotOutput("visited.households.per.area"),
-  
-  # Progress in first area subsection
-  h3(paste("Progress in", kStudyAreas[1])),
-  
-  plotOutput("progress.of.area1"),
-  
-  # Progress in second area subsection
-  h3(paste("Progress in", kStudyAreas[2])),
-  
-  plotOutput("progress.of.area2"),
-  
-  # Study profile section
-  h2("STUDY PROFILE"),
-  
-  # Profile of first area subsection
-  h3(paste("Profile of", kStudyAreas[1])),
-  
-  htmlOutput("profile.of.area1"),
-  
-  # Profile of second area subsection
-  h3(paste("Profile of", kStudyAreas[2])),
-  
-  htmlOutput("profile.of.area2"),
-  
-  # Duplicates section
-  h2("DUPLICATES"),
-  
-  # Summary of duplicates in first area subsection
-  h3(paste("Summary of duplicates in", kStudyAreas[1])),
-  
-  htmlOutput("summary.duplicates.of.area1"),
-  
-  # Summary of duplicates in second area subsection
-  h3(paste("Summary of duplicates in", kStudyAreas[2])),
-  
-  htmlOutput("summary.duplicates.of.area2"),
-  
-  # Main indicators section
-  h2("MAIN INDICATORS"),
-  span("Important:", style = kCSSWarning),
-  span("These indicators are computed by using raw data. Therefore, data has not 
-       passed any verification and/or cleaning process. They should not be used 
-       for analysis purposes. They are presented to address any possible data 
-       issue."),
-  
-  # SP indicators subsection
-  h3("SP Indicators"),
-  
-  fluidRow(
-    # Community indicators
-    column(6,
-      # SP service provided in first area widget
-      div(align = "center",
-        p(
-          paste("SP service provided in", kStudyAreas[1], "by CHW (c-IPTp)"),
-          style = kCSSMinnorHeader
-        ),
-        div(
-          div(
-            helpText(
-              textOutput("ciptp.knowledge.area1"), 
-              style = kCSSMediumNumber
-            )
-          ),
-          span("Women who know"),
-          style = kCSSLeftIndicatorBox
-        ),
-        div(
-          div(
-            helpText(
-              textOutput("ciptp.admin.area1"),
-              style = paste(kCSSBigNumber, kCSSEmphasis)
-            )
-          ),
-          span("Women who took", style =  paste("color:", kBlueEmphasis)),
-          style = kCSSRightIndicatorBox
-        ),
-        style = kCSSIndicatorsWidget
-      ),
-      br(),
-      # SP service provided in second area widget
-      div(align = "center",
-        p(
-          paste("SP service provided in", kStudyAreas[2], "by CHW (c-IPTp)"),
-          style = kCSSMinnorHeader
-        ),
-        div(
-          div(
-            helpText(
-              textOutput("ciptp.knowledge.area2"), 
-              style = kCSSMediumNumber
-            )
-          ),
-          span("Women who know"),
-          style = kCSSLeftIndicatorBox
-        ),
-        div(
-          div(
-            helpText(
-              textOutput("ciptp.admin.area2"),
-              style = paste(kCSSBigNumber, kCSSEmphasis)
-            )
-          ),
-          span("Women who took", style =  paste("color:", kBlueEmphasis)),
-          style = kCSSRightIndicatorBox
-        )
-      ),
-      style = kCSSIndicatorsWidget
-    ),
-    # Global SP adherence indicators
-    column(6,
-      div(align = "center",
-        htmlOutput("sp.indicators")
-      )
-    )
-  ),
-  
-  # ANC indicators subsection
-  h3("ANC Indicators"),
-  
-  htmlOutput("anc.indicators")
+  )
 )
 
 # Define server logic for the monitoring dashboard app
